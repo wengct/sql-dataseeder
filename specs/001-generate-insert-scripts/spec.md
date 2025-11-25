@@ -33,11 +33,11 @@
 
 **Acceptance Scenarios**:
 
-1. **Given** 資料表有 varchar(50) 欄位, **When** 產生 Insert 語法, **Then** 該欄位的值為不超過 50 個字元的字串
+1. **Given** 資料表有 varchar(50) 欄位, **When** 產生 Insert 語法, **Then** 該欄位的值為不超過 50 個字元的隨機字元組合字串
 2. **Given** 資料表有 int 欄位, **When** 產生 Insert 語法, **Then** 該欄位的值為整數
 3. **Given** 資料表有 datetime 欄位, **When** 產生 Insert 語法, **Then** 該欄位的值為有效的日期時間格式
 4. **Given** 資料表有 bit 欄位, **When** 產生 Insert 語法, **Then** 該欄位的值為 0 或 1
-5. **Given** 資料表有可為 NULL 的欄位, **When** 產生 Insert 語法, **Then** 該欄位可能產生 NULL 值或有效值
+5. **Given** 資料表有可為 NULL 的欄位, **When** 產生 Insert 語法, **Then** 該欄位永遠產生有效值（不產生 NULL）
 6. **Given** 資料表有 NOT NULL 欄位, **When** 產生 Insert 語法, **Then** 該欄位一定產生非 NULL 的有效值
 
 ---
@@ -65,6 +65,7 @@
 - 資料表有 IDENTITY 欄位時，產生的 Insert 語法應排除 IDENTITY 欄位
 - 資料表有 COMPUTED 欄位時，產生的 Insert 語法應排除 COMPUTED 欄位
 - 欄位有 DEFAULT 值且為 NOT NULL 時，產生假資料而非依賴 DEFAULT 值
+- 資料表有不支援的資料類型欄位時（如 geography、xml、varbinary、image 等），跳過該欄位並在成功通知中說明哪些欄位被跳過
 
 ## Requirements *(mandatory)*
 
@@ -75,13 +76,15 @@
 - **FR-003**: System MUST 將產生筆數的預設值設為 10 筆
 - **FR-004**: System MUST 使用 INFORMATION_SCHEMA 或 sys.* 系統檢視查詢資料表結構
 - **FR-005**: System MUST 根據欄位的資料類型產生符合該類型的假資料
+- **FR-005a**: System MUST 對字串類型欄位（varchar、nvarchar、char、nchar）產生隨機字元組合作為假資料
 - **FR-006**: System MUST 根據欄位的長度限制產生不超過該長度的假資料
-- **FR-007**: System MUST 根據欄位的可空性（NULL/NOT NULL）決定是否產生 NULL 值
+- **FR-007**: System MUST 對所有欄位（包含可為 NULL 的欄位）永遠產生有效值，不產生 NULL
 - **FR-008**: System MUST 將產生的 Insert 語法自動複製到剪貼簿
 - **FR-009**: System MUST 在成功產生語法後顯示通知告知使用者
 - **FR-010**: System MUST 在發生錯誤時顯示清楚的錯誤訊息並提供解決建議
 - **FR-011**: System MUST 排除 IDENTITY 欄位和 COMPUTED 欄位，不在 Insert 語法中包含這些欄位
 - **FR-012**: System MUST 支援常見的 SQL Server 資料類型（varchar、nvarchar、char、nchar、int、bigint、smallint、tinyint、decimal、numeric、float、real、datetime、datetime2、date、time、bit、uniqueidentifier）
+- **FR-013**: System MUST 跳過不支援的資料類型欄位，並在成功通知中說明哪些欄位被跳過
 
 ### Key Entities
 
@@ -103,4 +106,14 @@
 - 使用者已安裝 mssql 擴充套件 (ms-mssql.mssql) 並成功連線到 SQL Server 資料庫
 - 使用者對目標資料表有 SELECT 權限（用於查詢資料表結構）
 - 目標資料庫為 SQL Server 2016 或更新版本
-- mssql 擴充套件提供 API 讓其他擴充套件存取連線資訊和執行查詢
+- 系統嘗試使用 mssql 擴充套件 API 取得連線資訊；若 API 不可用或有重大變動，則優雅降級並顯示錯誤訊息引導使用者
+
+## Clarifications
+
+### Session 2025-11-25
+
+- Q: mssql 擴充套件整合方式為何？ → A: 嘗試使用 mssql API，若不可用則優雅降級顯示錯誤訊息
+- Q: 可為 NULL 欄位產生 NULL 值的機率為何？ → A: 永遠產生有效值，不產生 NULL
+- Q: 產生筆數的上限為何？ → A: 不設上限，讓使用者自行決定
+- Q: 不支援的資料類型如何處理？ → A: 跳過該欄位，在通知中說明哪些欄位被跳過
+- Q: 字串類型假資料的內容風格為何？ → A: 使用隨機字元組合
