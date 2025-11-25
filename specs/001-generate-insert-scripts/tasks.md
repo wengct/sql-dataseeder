@@ -32,22 +32,22 @@
 
 ### Test Infrastructure (Constitution III: Test-First Development)
 
-- [ ] T007 [P] Create test directory structure: src/test/unit/models/, src/test/unit/services/, src/test/unit/generators/
-- [ ] T008 [P] Write unit tests for SqlDataType enum in src/test/unit/models/sqlDataType.test.ts
-- [ ] T009 [P] Write unit tests for IColumnMetadata in src/test/unit/models/columnMetadata.test.ts (isInsertable, isSupported logic)
-- [ ] T010 [P] Write unit tests for ITableMetadata in src/test/unit/models/tableMetadata.test.ts (insertableColumns filtering)
+- [X] T007 [P] Create test directory structure: src/test/unit/models/, src/test/unit/services/, src/test/unit/generators/
+- [X] T008 [P] Write unit tests for SqlDataType enum in src/test/unit/models/sqlDataType.test.ts
+- [X] T009 [P] Write unit tests for IColumnMetadata in src/test/unit/models/columnMetadata.test.ts (isInsertable, isSupported logic)
+- [X] T010 [P] Write unit tests for ITableMetadata in src/test/unit/models/tableMetadata.test.ts (insertableColumns filtering)
 
 ### Model Implementation
 
-- [ ] T011 [P] Implement SqlDataType enum in src/models/sqlDataType.ts per data-model.md (tests T008 should pass)
-- [ ] T012 [P] Implement IColumnMetadata interface in src/models/columnMetadata.ts per contracts/types.ts (tests T009 should pass)
-- [ ] T013 [P] Implement ITableMetadata interface in src/models/tableMetadata.ts per contracts/types.ts (tests T010 should pass)
-- [ ] T014 [P] Implement IGenerationOptions and IGenerationResult interfaces in src/models/generationTypes.ts per contracts/types.ts
+- [X] T011 [P] Implement SqlDataType enum in src/models/sqlDataType.ts per data-model.md (tests T008 should pass)
+- [X] T012 [P] Implement IColumnMetadata interface in src/models/columnMetadata.ts per contracts/types.ts (tests T009 should pass)
+- [X] T013 [P] Implement ITableMetadata interface in src/models/tableMetadata.ts per contracts/types.ts (tests T010 should pass)
+- [X] T014 [P] Implement IGenerationOptions and IGenerationResult interfaces in src/models/generationTypes.ts per contracts/types.ts
 
 ### Service Infrastructure
 
-- [ ] T015 Implement MssqlService class in src/services/mssqlService.ts per research.md (mssql API integration)
-- [ ] T016 Implement error message constants and helper functions in src/utils/errorMessages.ts
+- [X] T015 Implement MssqlService class in src/services/mssqlService.ts per research.md (mssql API integration)
+- [X] T016 Implement error message constants and helper functions in src/utils/errorMessages.ts
 
 **Checkpoint**: Foundation ready - user story implementation can now begin
 
