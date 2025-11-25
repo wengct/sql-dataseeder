@@ -63,21 +63,21 @@
 
 ### Test-First: Service Tests (Constitution III)
 
-- [ ] T017 [P] [US1] Write unit tests for SchemaService in src/test/unit/services/schemaService.test.ts
-- [ ] T018 [P] [US2] Write unit tests for FakeDataService in src/test/unit/services/fakeDataService.test.ts (all data types)
-- [ ] T019 [P] [US1] Write unit tests for InsertScriptGenerator in src/test/unit/generators/insertScriptGenerator.test.ts
+- [X] T017 [P] [US1] Write unit tests for SchemaService in src/test/unit/services/schemaService.test.ts
+- [X] T018 [P] [US2] Write unit tests for FakeDataService in src/test/unit/services/fakeDataService.test.ts (all data types)
+- [X] T019 [P] [US1] Write unit tests for InsertScriptGenerator in src/test/unit/generators/insertScriptGenerator.test.ts
 
 ### Implementation for User Story 1 + 2
 
-- [ ] T020 [P] [US1] Implement SchemaService class in src/services/schemaService.ts (查詢資料表結構, tests T017 should pass)
-- [ ] T021 [P] [US2] Implement FakeDataService class in src/services/fakeDataService.ts (假資料產生 - 字串類型, 字元集 a-zA-Z0-9)
-- [ ] T022 [US2] Add numeric type fake data generation to src/services/fakeDataService.ts (int, bigint, decimal, float)
-- [ ] T023 [US2] Add datetime type fake data generation to src/services/fakeDataService.ts (datetime, date, time)
-- [ ] T024 [US2] Add other type fake data generation to src/services/fakeDataService.ts (bit, uniqueidentifier)
-- [ ] T025 [US1] Implement InsertScriptGenerator class in src/generators/insertScriptGenerator.ts (tests T019 should pass)
-- [ ] T026 [US1] Implement generateInsertScripts command handler in src/commands/generateInsertScripts.ts
-- [ ] T027 [US1] Register command and update extension activation in src/extension.ts
-- [ ] T028 [US1] Implement clipboard utility in src/utils/clipboard.ts
+- [X] T020 [P] [US1] Implement SchemaService class in src/services/schemaService.ts (查詢資料表結構, tests T017 should pass)
+- [X] T021 [P] [US2] Implement FakeDataService class in src/services/fakeDataService.ts (假資料產生 - 字串類型, 字元集 a-zA-Z0-9)
+- [X] T022 [US2] Add numeric type fake data generation to src/services/fakeDataService.ts (int, bigint, decimal, float)
+- [X] T023 [US2] Add datetime type fake data generation to src/services/fakeDataService.ts (datetime, date, time)
+- [X] T024 [US2] Add other type fake data generation to src/services/fakeDataService.ts (bit, uniqueidentifier)
+- [X] T025 [US1] Implement InsertScriptGenerator class in src/generators/insertScriptGenerator.ts (tests T019 should pass)
+- [X] T026 [US1] Implement generateInsertScripts command handler in src/commands/generateInsertScripts.ts
+- [X] T027 [US1] Register command and update extension activation in src/extension.ts
+- [X] T028 [US1] Implement clipboard utility in src/utils/clipboard.ts
 
 **Checkpoint**: At this point, User Story 1 + 2 should be fully functional - user can generate insert scripts with valid fake data
 
