@@ -2,6 +2,7 @@ import { SqlDataType, SUPPORTED_DATA_TYPES } from './sqlDataType';
 
 /**
  * 欄位結構資訊
+ * 描述 SQL Server 資料表中的單一欄位屬性
  */
 export interface ColumnMetadata {
   /** 欄位名稱 */
@@ -10,7 +11,11 @@ export interface ColumnMetadata {
   /** SQL Server 資料類型 */
   readonly dataType: SqlDataType;
 
-  /** 最大長度（字元數），null 表示無限制或不適用，-1 表示 MAX */
+  /** 
+   * 最大長度（字元數）
+   * - null: 無限制或不適用
+   * - -1: MAX（如 varchar(max)）
+   */
   readonly maxLength: number | null;
 
   /** 精確度（用於 decimal/numeric） */
@@ -22,10 +27,10 @@ export interface ColumnMetadata {
   /** 是否可為 NULL */
   readonly isNullable: boolean;
 
-  /** 是否為 IDENTITY 欄位 */
+  /** 是否為 IDENTITY 欄位（自動遞增） */
   readonly isIdentity: boolean;
 
-  /** 是否為 COMPUTED 欄位 */
+  /** 是否為 COMPUTED 欄位（計算欄位） */
   readonly isComputed: boolean;
 }
 

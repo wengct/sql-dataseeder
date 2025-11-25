@@ -91,15 +91,15 @@
 
 ### Test-First: Error Handling Tests (Constitution III)
 
-- [ ] T029 [US3] Write unit tests for error scenarios in src/test/unit/commands/generateInsertScripts.test.ts
+- [X] T029 [US3] Write unit tests for error scenarios in src/test/unit/commands/generateInsertScripts.test.ts
 
 ### Implementation for User Story 3
 
-- [ ] T030 [US3] Add mssql extension availability check and error handling to src/services/mssqlService.ts
-- [ ] T031 [US3] Add connection error handling to src/commands/generateInsertScripts.ts
-- [ ] T032 [US3] Add input validation (row count) error handling to src/commands/generateInsertScripts.ts
-- [ ] T033 [US3] Add no insertable columns error handling to src/generators/insertScriptGenerator.ts
-- [ ] T034 [US3] Add skipped columns notification to src/commands/generateInsertScripts.ts
+- [X] T030 [US3] Add mssql extension availability check and error handling to src/services/mssqlService.ts
+- [X] T031 [US3] Add connection error handling to src/commands/generateInsertScripts.ts
+- [X] T032 [US3] Add input validation (row count) error handling to src/commands/generateInsertScripts.ts
+- [X] T033 [US3] Add no insertable columns error handling to src/generators/insertScriptGenerator.ts
+- [X] T034 [US3] Add skipped columns notification to src/commands/generateInsertScripts.ts
 
 **Checkpoint**: All user stories should now be independently functional with proper error handling
 
@@ -109,11 +109,11 @@
 
 **Purpose**: Improvements that affect multiple user stories
 
-- [ ] T035 [P] Add JSDoc comments to all public APIs
-- [ ] T036 [P] Update README.md with usage instructions per quickstart.md
-- [ ] T037 Run quickstart.md validation scenarios
-- [ ] T038 Code cleanup and ensure strict TypeScript compliance (no any types)
-- [ ] T039 Run all tests and ensure coverage >= 80% (Constitution III requirement)
+- [X] T035 [P] Add JSDoc comments to all public APIs
+- [X] T036 [P] Update README.md with usage instructions per quickstart.md
+- [X] T037 Run quickstart.md validation scenarios
+- [X] T038 Code cleanup and ensure strict TypeScript compliance (no any types)
+- [X] T039 Run all tests and ensure coverage >= 80% (Constitution III requirement)
 
 ---
 
