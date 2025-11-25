@@ -76,8 +76,8 @@
 - **FR-003**: System MUST 將產生筆數的預設值設為 10 筆
 - **FR-004**: System MUST 使用 INFORMATION_SCHEMA 或 sys.* 系統檢視查詢資料表結構
 - **FR-005**: System MUST 根據欄位的資料類型產生符合該類型的假資料
-- **FR-005a**: System MUST 對字串類型欄位（varchar、nvarchar、char、nchar）產生隨機字元組合作為假資料
-- **FR-006**: System MUST 根據欄位的長度限制產生不超過該長度的假資料
+- **FR-005a**: System MUST 對字串類型欄位（varchar、nvarchar、char、nchar）產生隨機字元組合作為假資料，字元集為英數字元（a-zA-Z0-9）
+- **FR-006**: System MUST 根據欄位的長度限制產生不超過該長度的假資料；當 max_length 為 -1（MAX 類型）時，預設產生 100 個字元
 - **FR-007**: System MUST 對所有欄位（包含可為 NULL 的欄位）永遠產生有效值，不產生 NULL
 - **FR-008**: System MUST 將產生的 Insert 語法自動複製到剪貼簿
 - **FR-009**: System MUST 在成功產生語法後顯示通知告知使用者

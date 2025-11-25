@@ -29,7 +29,7 @@
 │ isNullable: boolean                                             │
 │ isIdentity: boolean                                             │
 │ isComputed: boolean                                             │
-│ isInsertable: boolean (computed: !isIdentity && !isComputed)    │
+│ isInsertable: boolean (computed: !isIdentity && !isComputed && isSupported) │
 │ isSupported: boolean (computed: based on dataType)              │
 └─────────────────────────────────────────────────────────────────┘
 ```
@@ -161,10 +161,10 @@ enum SqlDataType {
 
 ### ColumnMetadata
 
-1. `isInsertable` = `!isIdentity && !isComputed && isSupported`
+1. `isInsertable` = `!isIdentity && !isComputed && isSupported`（必須三個條件皆滿足）
 2. `isSupported` = `dataType !== SqlDataType.UNSUPPORTED`
 3. 對於 nvarchar/nchar，`maxLength` 需要從 bytes 轉換為字元數（除以 2）
-4. `maxLength` 為 -1 表示 MAX（如 varchar(max)）
+4. `maxLength` 為 -1 表示 MAX（如 varchar(max)），產生假資料時預設使用 100 字元
 
 ### GenerationOptions
 
