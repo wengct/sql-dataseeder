@@ -1,6 +1,7 @@
 {
   "name": "sql-dataseeder",
   "displayName": "SQL DataSeeder",
+  "publisher": "wengct",
   "description": "快速針對指定資料表產生 INSERT 語法。",
   "version": "0.0.1",
   "engines": {

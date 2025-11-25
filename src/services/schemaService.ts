@@ -5,16 +5,25 @@ import { MssqlService } from './mssqlService';
 
 /**
  * SQL 查詢結果的欄位資訊（從 sys.columns 查詢）
+ * 注意：mssql API 回傳字串格式的值，但也支援原始類型以保持向後相容
  */
-interface IColumnQueryResult {
-  column_name: string;
-  data_type: string;
-  max_length: number;
-  precision: number;
-  scale: number;
-  is_nullable: boolean;
-  is_identity: boolean;
-  is_computed: boolean;
+export interface IColumnQueryResult {
+  column_name?: string;
+  COLUMN_NAME?: string;
+  data_type?: string;
+  DATA_TYPE?: string;
+  max_length?: number | string;
+  MAX_LENGTH?: number | string;
+  precision?: number | string;
+  PRECISION?: number | string;
+  scale?: number | string;
+  SCALE?: number | string;
+  is_nullable?: boolean | number | string;
+  IS_NULLABLE?: boolean | number | string;
+  is_identity?: boolean | number | string;
+  IS_IDENTITY?: boolean | number | string;
+  is_computed?: boolean | number | string;
+  IS_COMPUTED?: boolean | number | string;
 }
 
 /**
@@ -30,12 +39,26 @@ export class SchemaService {
    * @returns 資料表結構資訊
    */
   async getTableMetadata(node: unknown): Promise<TableMetadata> {
-    const { schemaName, tableName } = this.mssqlService.getTableInfo(node);
-    const query = SchemaService.buildSchemaQuery(schemaName, tableName);
+    const { schemaName, tableName, databaseName } = this.mssqlService.getTableInfo(node);
+    const query = SchemaService.buildSchemaQuery(schemaName, tableName, databaseName);
+
+    // 除錯：輸出要執行的 SQL
+    console.log('Executing SQL query:', query);
 
     const results = await this.mssqlService.executeQuery<IColumnQueryResult>(node, query);
 
+    // 除錯：輸出原始查詢結果
+    console.log('Schema query results:', results);
+    console.log('Results length:', results.length);
+    if (results.length > 0) {
+      console.log('First row keys:', Object.keys(results[0]));
+      console.log('First row:', results[0]);
+    }
+
     const columns = results.map(SchemaService.parseColumnQueryResult);
+
+    // 除錯：輸出解析後的欄位
+    console.log('Parsed columns:', columns);
 
     return SchemaService.buildTableMetadata(schemaName, tableName, columns);
   }
@@ -43,9 +66,11 @@ export class SchemaService {
   /**
    * 建立查詢資料表結構的 SQL 語句
    */
-  static buildSchemaQuery(schemaName: string, tableName: string): string {
-    return `
-SELECT 
+  static buildSchemaQuery(schemaName: string, tableName: string, databaseName?: string): string {
+    // 如果有資料庫名稱，使用 USE 語句切換資料庫
+    const useDatabase = databaseName ? `USE [${databaseName}];\n` : '';
+    
+    return `${useDatabase}SELECT 
     c.name AS column_name,
     t.name AS data_type,
     c.max_length,
@@ -57,18 +82,37 @@ SELECT
 FROM sys.columns c
 INNER JOIN sys.types t ON c.user_type_id = t.user_type_id
 WHERE c.object_id = OBJECT_ID('[${schemaName}].[${tableName}]')
-ORDER BY c.column_id;
-`.trim();
+ORDER BY c.column_id;`.trim();
   }
 
   /**
    * 解析 SQL 查詢結果為 ColumnMetadata
    */
   static parseColumnQueryResult(row: IColumnQueryResult): ColumnMetadata {
-    const dataType = parseSqlDataType(row.data_type);
+    // 處理不同大小寫的欄位名稱
+    const columnName = row.column_name ?? row.COLUMN_NAME ?? '';
+    const dataTypeName = row.data_type ?? row.DATA_TYPE ?? '';
+    const maxLengthRaw = row.max_length ?? row.MAX_LENGTH ?? 0;
+    const precisionRaw = row.precision ?? row.PRECISION ?? 0;
+    const scaleRaw = row.scale ?? row.SCALE ?? 0;
+    const isNullableRaw = row.is_nullable ?? row.IS_NULLABLE ?? false;
+    const isIdentityRaw = row.is_identity ?? row.IS_IDENTITY ?? false;
+    const isComputedRaw = row.is_computed ?? row.IS_COMPUTED ?? false;
+
+    // 轉換布林值（mssql API 回傳字串 'true'/'false' 或 '1'/'0'）
+    const isNullable = SchemaService.parseBooleanValue(isNullableRaw);
+    const isIdentity = SchemaService.parseBooleanValue(isIdentityRaw);
+    const isComputed = SchemaService.parseBooleanValue(isComputedRaw);
+
+    const dataType = parseSqlDataType(dataTypeName);
+
+    // 解析數值（mssql API 回傳的是字串）
+    const maxLengthNum = SchemaService.parseNumberValue(maxLengthRaw);
+    const precisionNum = SchemaService.parseNumberValue(precisionRaw);
+    const scaleNum = SchemaService.parseNumberValue(scaleRaw);
 
     // 對於 nvarchar/nchar，max_length 是 bytes，需要轉換為字元數
-    let maxLength: number | null = row.max_length;
+    let maxLength: number | null = maxLengthNum;
     if (maxLength !== -1 && (dataType === SqlDataType.NVARCHAR || dataType === SqlDataType.NCHAR)) {
       maxLength = Math.floor(maxLength / 2);
     }
@@ -85,15 +129,46 @@ ORDER BY c.column_id;
     const isDecimalType = [SqlDataType.DECIMAL, SqlDataType.NUMERIC].includes(dataType);
 
     return {
-      name: row.column_name,
+      name: columnName,
       dataType,
       maxLength: isStringType ? maxLength : null,
-      precision: isDecimalType ? row.precision : null,
-      scale: isDecimalType ? row.scale : null,
-      isNullable: row.is_nullable,
-      isIdentity: row.is_identity,
-      isComputed: row.is_computed
+      precision: isDecimalType ? precisionNum : null,
+      scale: isDecimalType ? scaleNum : null,
+      isNullable,
+      isIdentity,
+      isComputed
     };
+  }
+
+  /**
+   * 解析布林值（處理字串 'true'/'false'、'1'/'0'、數字 1/0、布林值）
+   */
+  static parseBooleanValue(value: unknown): boolean {
+    if (typeof value === 'boolean') {
+      return value;
+    }
+    if (typeof value === 'number') {
+      return value !== 0;
+    }
+    if (typeof value === 'string') {
+      const lower = value.toLowerCase();
+      return lower === 'true' || lower === '1';
+    }
+    return false;
+  }
+
+  /**
+   * 解析數值（處理字串或數字）
+   */
+  static parseNumberValue(value: unknown): number {
+    if (typeof value === 'number') {
+      return value;
+    }
+    if (typeof value === 'string') {
+      const num = parseInt(value, 10);
+      return isNaN(num) ? 0 : num;
+    }
+    return 0;
   }
 
   /**

@@ -2,7 +2,7 @@ import * as assert from 'assert';
 import { SqlDataType } from '../../../models/sqlDataType';
 import { ColumnMetadata } from '../../../models/columnMetadata';
 import { TableMetadata } from '../../../models/tableMetadata';
-import { SchemaService } from '../../../services/schemaService';
+import { SchemaService, IColumnQueryResult } from '../../../services/schemaService';
 
 suite('SchemaService', () => {
   suite('parseColumnQueryResult', () => {
@@ -134,6 +134,138 @@ suite('SchemaService', () => {
       const column = SchemaService.parseColumnQueryResult(queryResult);
 
       assert.strictEqual(column.dataType, SqlDataType.UNSUPPORTED);
+    });
+
+    test('should parse string boolean values from mssql API', () => {
+      const queryResult = {
+        column_name: 'TestColumn',
+        data_type: 'int',
+        max_length: '4',
+        precision: '10',
+        scale: '0',
+        is_nullable: 'true',
+        is_identity: 'false',
+        is_computed: '0'
+      };
+
+      const column = SchemaService.parseColumnQueryResult(queryResult);
+
+      assert.strictEqual(column.isNullable, true);
+      assert.strictEqual(column.isIdentity, false);
+      assert.strictEqual(column.isComputed, false);
+    });
+
+    test('should parse string "1" as true for boolean values', () => {
+      const queryResult = {
+        column_name: 'TestColumn',
+        data_type: 'int',
+        max_length: '4',
+        precision: '10',
+        scale: '0',
+        is_nullable: '1',
+        is_identity: '1',
+        is_computed: '1'
+      };
+
+      const column = SchemaService.parseColumnQueryResult(queryResult);
+
+      assert.strictEqual(column.isNullable, true);
+      assert.strictEqual(column.isIdentity, true);
+      assert.strictEqual(column.isComputed, true);
+    });
+
+    test('should parse string number values from mssql API', () => {
+      const queryResult = {
+        column_name: 'Price',
+        data_type: 'decimal',
+        max_length: '9',
+        precision: '18',
+        scale: '2',
+        is_nullable: false,
+        is_identity: false,
+        is_computed: false
+      };
+
+      const column = SchemaService.parseColumnQueryResult(queryResult);
+
+      assert.strictEqual(column.precision, 18);
+      assert.strictEqual(column.scale, 2);
+    });
+  });
+
+  suite('parseBooleanValue', () => {
+    test('should parse boolean true correctly', () => {
+      assert.strictEqual(SchemaService.parseBooleanValue(true), true);
+    });
+
+    test('should parse boolean false correctly', () => {
+      assert.strictEqual(SchemaService.parseBooleanValue(false), false);
+    });
+
+    test('should parse number 1 as true', () => {
+      assert.strictEqual(SchemaService.parseBooleanValue(1), true);
+    });
+
+    test('should parse number 0 as false', () => {
+      assert.strictEqual(SchemaService.parseBooleanValue(0), false);
+    });
+
+    test('should parse string "true" as true', () => {
+      assert.strictEqual(SchemaService.parseBooleanValue('true'), true);
+    });
+
+    test('should parse string "false" as false', () => {
+      assert.strictEqual(SchemaService.parseBooleanValue('false'), false);
+    });
+
+    test('should parse string "1" as true', () => {
+      assert.strictEqual(SchemaService.parseBooleanValue('1'), true);
+    });
+
+    test('should parse string "0" as false', () => {
+      assert.strictEqual(SchemaService.parseBooleanValue('0'), false);
+    });
+
+    test('should parse string "TRUE" as true (case-insensitive)', () => {
+      assert.strictEqual(SchemaService.parseBooleanValue('TRUE'), true);
+    });
+
+    test('should return false for undefined', () => {
+      assert.strictEqual(SchemaService.parseBooleanValue(undefined), false);
+    });
+
+    test('should return false for null', () => {
+      assert.strictEqual(SchemaService.parseBooleanValue(null), false);
+    });
+  });
+
+  suite('parseNumberValue', () => {
+    test('should parse number correctly', () => {
+      assert.strictEqual(SchemaService.parseNumberValue(42), 42);
+    });
+
+    test('should parse string number correctly', () => {
+      assert.strictEqual(SchemaService.parseNumberValue('42'), 42);
+    });
+
+    test('should parse negative number correctly', () => {
+      assert.strictEqual(SchemaService.parseNumberValue(-1), -1);
+    });
+
+    test('should parse string negative number correctly', () => {
+      assert.strictEqual(SchemaService.parseNumberValue('-1'), -1);
+    });
+
+    test('should return 0 for non-numeric string', () => {
+      assert.strictEqual(SchemaService.parseNumberValue('abc'), 0);
+    });
+
+    test('should return 0 for undefined', () => {
+      assert.strictEqual(SchemaService.parseNumberValue(undefined), 0);
+    });
+
+    test('should return 0 for null', () => {
+      assert.strictEqual(SchemaService.parseNumberValue(null), 0);
     });
   });
 
