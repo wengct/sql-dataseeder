@@ -54,11 +54,12 @@ export class SchemaService {
    */
   static buildSchemaQuery(schemaName: string, tableName: string, databaseName?: string): string {
     // 如果有資料庫名稱，使用 USE 語句切換資料庫，使用 QUOTENAME() 防止 SQL 注入
-    const useDatabase = databaseName ? `USE ${SchemaService.quoteIdentifier(databaseName)};\n` : '';
+    const useDatabase = databaseName ? `USE ${SchemaService.quoteBracketIdentifier(databaseName)};\n` : '';
     
     // 使用 QUOTENAME() 函數進行 SQL Server 識別碼跳脫，防止 SQL 注入攻擊
-    const quotedSchema = SchemaService.quoteIdentifier(schemaName);
-    const quotedTable = SchemaService.quoteIdentifier(tableName);
+    // 將識別碼作為字串字面值傳入 QUOTENAME()，由 SQL Server 處理跳脫
+    const quotedSchema = SchemaService.quoteStringLiteral(schemaName);
+    const quotedTable = SchemaService.quoteStringLiteral(tableName);
     
     return `${useDatabase}SELECT 
     c.name AS column_name,
@@ -76,14 +77,26 @@ ORDER BY c.column_id;`.trim();
   }
 
   /**
-   * 對 SQL Server 識別碼進行跳脫，防止 SQL 注入
-   * 使用單引號包圍字串，並將內部的單引號替換為兩個單引號
-   * @param identifier 識別碼（資料庫名稱、Schema 名稱或資料表名稱）
+   * 使用方括號包圍 SQL Server 識別碼，並跳脫內部的右方括號
+   * 適用於 USE 語句等不支援 QUOTENAME() 的情況
+   * @param identifier 識別碼
    * @returns 跳脫後的識別碼
    */
-  static quoteIdentifier(identifier: string): string {
+  static quoteBracketIdentifier(identifier: string): string {
+    // 將右方括號替換為兩個右方括號以防止 SQL 注入
+    const escaped = identifier.replace(/]/g, ']]');
+    return `[${escaped}]`;
+  }
+
+  /**
+   * 將字串轉換為 SQL 字串字面值，供 QUOTENAME() 函數使用
+   * 使用單引號包圍字串，並將內部的單引號替換為兩個單引號
+   * @param value 字串值
+   * @returns SQL 字串字面值
+   */
+  static quoteStringLiteral(value: string): string {
     // 將單引號替換為兩個單引號以防止 SQL 注入
-    const escaped = identifier.replace(/'/g, "''");
+    const escaped = value.replace(/'/g, "''");
     return `'${escaped}'`;
   }
 
