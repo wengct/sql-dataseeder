@@ -58,7 +58,6 @@ export class SchemaService {
     const columns = results.map(SchemaService.parseColumnQueryResult);
 
     // 除錯：輸出解析後的欄位
-    console.log('Parsed columns:', columns);
 
     return SchemaService.buildTableMetadata(schemaName, tableName, columns);
   }
