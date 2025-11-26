@@ -28,6 +28,7 @@ export const ErrorMessages = {
   // 查詢相關
   QUERY_FAILED: 'Failed to query table structure. Please try again.',
   QUERY_TIMEOUT: 'Query timed out. Please try again.',
+  QUERY_RESULT_NO_COLUMNS: 'Query result has no column information. The query may have returned an empty result set.',
 
   // 一般錯誤
   UNKNOWN_ERROR: 'An unknown error occurred. Please try again.',
