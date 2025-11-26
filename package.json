@@ -1,7 +1,7 @@
 {
   "name": "sql-dataseeder",
   "displayName": "SQL DataSeeder",
-  "publisher": "wengct",
+  "publisher": "weng-ct",
   "icon": "Sql-DataSeeder.png",
   "repository": {
     "type": "git",
