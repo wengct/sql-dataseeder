@@ -1,5 +1,6 @@
 import { SqlDataType, SUPPORTED_DATA_TYPES, parseSqlDataType } from '../models/sqlDataType';
 import { ColumnMetadata } from '../models/columnMetadata';
+import { escapeSqlString } from '../utils/sqlEscape';
 
 /**
  * 假資料產生服務
@@ -89,25 +90,25 @@ export class FakeDataService {
   private generateVarcharValue(maxLength: number | null): string {
     const length = this.calculateStringLength(maxLength, false);
     const value = this.generateRandomString(length);
-    return `'${value}'`;
+    return `'${escapeSqlString(value)}'`;
   }
 
   private generateNvarcharValue(maxLength: number | null): string {
     const length = this.calculateStringLength(maxLength, false);
     const value = this.generateRandomString(length);
-    return `N'${value}'`;
+    return `N'${escapeSqlString(value)}'`;
   }
 
   private generateCharValue(maxLength: number | null): string {
     const length = this.calculateStringLength(maxLength, true);
     const value = this.generateRandomString(length);
-    return `'${value}'`;
+    return `'${escapeSqlString(value)}'`;
   }
 
   private generateNcharValue(maxLength: number | null): string {
     const length = this.calculateStringLength(maxLength, true);
     const value = this.generateRandomString(length);
-    return `N'${value}'`;
+    return `N'${escapeSqlString(value)}'`;
   }
 
   /**
