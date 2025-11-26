@@ -1,4 +1,4 @@
-import { ColumnMetadata, isColumnInsertable } from '../models/columnMetadata';
+import { ColumnMetadata } from '../models/columnMetadata';
 import { TableMetadata, getFullTableName, getInsertableColumns } from '../models/tableMetadata';
 import { GenerationOptions, GenerationResult, createSuccessResult, createErrorResult } from '../models/generationTypes';
 import { SqlDataType } from '../models/sqlDataType';
