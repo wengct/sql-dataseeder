@@ -1,6 +1,7 @@
 {
   "name": "sql-dataseeder",
   "displayName": "SQL DataSeeder",
+  "publisher": "wengct",
   "description": "快速針對指定資料表產生 INSERT 語法。",
   "version": "0.0.1",
   "engines": {
@@ -11,13 +12,25 @@
   ],
   "activationEvents": [],
   "main": "./dist/extension.js",
+  "extensionDependencies": [
+    "ms-mssql.mssql"
+  ],
   "contributes": {
     "commands": [
       {
-        "command": "sql-dataseeder.helloWorld",
-        "title": "Hello World"
+        "command": "sql-dataseeder.generateInsertScripts",
+        "title": "Generate Insert Scripts"
       }
-    ]
+    ],
+    "menus": {
+      "view/item/context": [
+        {
+          "command": "sql-dataseeder.generateInsertScripts",
+          "when": "view == objectExplorer && viewItem =~ /type=Table/",
+          "group": "sql-dataseeder@1"
+        }
+      ]
+    }
   },
   "scripts": {
     "vscode:prepublish": "npm run package",

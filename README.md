@@ -1,71 +1,86 @@
-# sql-dataseeder README
+# SQL DataSeeder
 
-This is the README for your extension "sql-dataseeder". After writing up a brief description, we recommend including the following sections.
+快速針對 SQL Server 資料表產生 INSERT 語法的 VS Code 擴充套件。
 
-## Features
+## 功能
 
-Describe specific features of your extension including screenshots of your extension in action. Image paths are relative to this README file.
+從 Object Explorer 的資料表節點右鍵選單，快速產生含有假資料的 INSERT 語法，並自動複製到剪貼簿。
 
-For example if there is an image subfolder under your extension project workspace:
 
-\!\[feature X\]\(images/feature-x.png\)
+### 主要特點
 
-> Tip: Many popular extensions utilize animations. This is an excellent way to show off your extension! We recommend short, focused animations that are easy to follow.
+- 🎯 **一鍵產生**: 右鍵選單直接呼叫，無需複雜設定
+- 📋 **自動複製**: 產生的 INSERT 語法自動複製到剪貼簿
+- 🎲 **智慧假資料**: 根據欄位類型自動產生合適的假資料
+- ⚡ **高效能**: 100 筆 INSERT 語法在 2 秒內完成
 
-## Requirements
+## 先決條件
 
-If you have any requirements or dependencies, add a section describing those and how to install and configure them.
+1. 安裝 [SQL Server (mssql)](https://marketplace.visualstudio.com/items?itemName=ms-mssql.mssql) 擴充套件
+2. 使用 mssql 擴充套件連線到 SQL Server 資料庫
 
-## Extension Settings
+## 使用方式
 
-Include if your extension adds any VS Code settings through the `contributes.configuration` extension point.
+1. 在 VS Code 側邊欄開啟 SQL Server Object Explorer
+2. 展開資料庫 → Tables
+3. 在目標資料表上**點擊右鍵**
+4. 選擇「**Generate Insert Scripts**」
+5. 輸入要產生的筆數（預設 10 筆，最大 1000 筆）
+6. INSERT 語法已複製到剪貼簿，直接貼上使用！
 
-For example:
+## 範例輸出
 
-This extension contributes the following settings:
+```sql
+INSERT INTO [dbo].[Users] ([Name], [Email], [Age], [CreatedAt]) VALUES ('xK9pLm2w', N'abc123def', 25, '2025-01-15 10:30:00.123');
+INSERT INTO [dbo].[Users] ([Name], [Email], [Age], [CreatedAt]) VALUES ('Qw2rTy8x', N'def456ghi', 32, '2025-02-20 14:45:00.456');
+INSERT INTO [dbo].[Users] ([Name], [Email], [Age], [CreatedAt]) VALUES ('Mn3bVc5z', N'ghi789jkl', 28, '2025-03-10 09:15:00.789');
+```
 
-* `myExtension.enable`: Enable/disable this extension.
-* `myExtension.thing`: Set to `blah` to do something.
+## 支援的資料類型
 
-## Known Issues
+| 類型 | 產生的值範例 |
+|------|-------------|
+| varchar, nvarchar, char, nchar | `'xK9pLm'` (英數字元) |
+| int, bigint, smallint, tinyint | `12345` |
+| decimal, numeric | `123.45` |
+| float, real | `123.4567` |
+| datetime, datetime2 | `'2025-01-15 10:30:00.123'` |
+| date | `'2025-01-15'` |
+| time | `'10:30:00'` |
+| bit | `0` 或 `1` |
+| uniqueidentifier | `'a1b2c3d4-e5f6-4890-abcd-ef1234567890'` |
 
-Calling out known issues can help limit users opening duplicate issues against your extension.
+## 自動排除的欄位
+
+- **IDENTITY 欄位**: 自動遞增欄位不會出現在 INSERT 語法中
+- **COMPUTED 欄位**: 計算欄位不會出現在 INSERT 語法中
+- **不支援的資料類型**: geography、geometry、xml、varbinary、image、text、ntext、sql_variant、hierarchyid、timestamp/rowversion
+
+## 常見問題
+
+### 看不到「Generate Insert Scripts」選項？
+
+請確認：
+- 已安裝 mssql 擴充套件
+- 正在「Table」節點上點擊右鍵（不是資料夾或欄位）
+
+### 錯誤：「No active database connection」
+
+請先使用 mssql 擴充套件連線到資料庫。
+
+### 某些欄位沒有出現？
+
+該欄位可能是 IDENTITY、COMPUTED 或不支援的資料類型。成功通知中會說明哪些欄位被跳過。
 
 ## Release Notes
 
-Users appreciate release notes as you update your extension.
+### 0.0.1
 
-### 1.0.0
-
-Initial release of ...
-
-### 1.0.1
-
-Fixed issue #.
-
-### 1.1.0
-
-Added features X, Y, and Z.
+- 初始版本
+- 支援 18 種 SQL Server 資料類型
+- 右鍵選單整合
+- 自動複製到剪貼簿
 
 ---
 
-## Following extension guidelines
-
-Ensure that you've read through the extensions guidelines and follow the best practices for creating your extension.
-
-* [Extension Guidelines](https://code.visualstudio.com/api/references/extension-guidelines)
-
-## Working with Markdown
-
-You can author your README using Visual Studio Code. Here are some useful editor keyboard shortcuts:
-
-* Split the editor (`Cmd+\` on macOS or `Ctrl+\` on Windows and Linux).
-* Toggle preview (`Shift+Cmd+V` on macOS or `Shift+Ctrl+V` on Windows and Linux).
-* Press `Ctrl+Space` (Windows, Linux, macOS) to see a list of Markdown snippets.
-
-## For more information
-
-* [Visual Studio Code's Markdown Support](http://code.visualstudio.com/docs/languages/markdown)
-* [Markdown Syntax Reference](https://help.github.com/articles/markdown-basics/)
-
-**Enjoy!**
+**Enjoy!** 🚀
