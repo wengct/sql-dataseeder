@@ -1,8 +1,7 @@
 import * as assert from 'assert';
 import { SqlDataType } from '../../../models/sqlDataType';
 import { ColumnMetadata } from '../../../models/columnMetadata';
-import { TableMetadata } from '../../../models/tableMetadata';
-import { SchemaService, IColumnQueryResult } from '../../../services/schemaService';
+import { SchemaService } from '../../../services/schemaService';
 
 suite('SchemaService', () => {
   suite('parseColumnQueryResult', () => {
@@ -308,14 +307,56 @@ suite('SchemaService', () => {
 
       assert.ok(query.includes('sys.columns'));
       assert.ok(query.includes('sys.types'));
-      assert.ok(query.includes('[dbo].[Users]'));
+      assert.ok(query.includes("QUOTENAME('dbo')"));
+      assert.ok(query.includes("QUOTENAME('Users')"));
       assert.ok(query.includes('OBJECT_ID'));
     });
 
     test('should handle schema with special characters', () => {
       const query = SchemaService.buildSchemaQuery('my schema', 'my table');
 
-      assert.ok(query.includes('[my schema].[my table]'));
+      assert.ok(query.includes("QUOTENAME('my schema')"));
+      assert.ok(query.includes("QUOTENAME('my table')"));
+    });
+
+    test('should handle database name with USE statement and QUOTENAME', () => {
+      const query = SchemaService.buildSchemaQuery('dbo', 'Users', 'MyDatabase');
+
+      assert.ok(query.includes("USE 'MyDatabase'"));
+    });
+
+    test('should escape single quotes in identifiers to prevent SQL injection', () => {
+      const query = SchemaService.buildSchemaQuery("dbo'injection", "Users'; DROP TABLE--", "Db'test");
+
+      assert.ok(query.includes("USE 'Db''test'"));
+      assert.ok(query.includes("QUOTENAME('dbo''injection')"));
+      assert.ok(query.includes("QUOTENAME('Users''; DROP TABLE--')"));
+    });
+  });
+
+  suite('quoteIdentifier', () => {
+    test('should wrap identifier in single quotes', () => {
+      const result = SchemaService.quoteIdentifier('MyTable');
+
+      assert.strictEqual(result, "'MyTable'");
+    });
+
+    test('should escape single quotes in identifier', () => {
+      const result = SchemaService.quoteIdentifier("My'Table");
+
+      assert.strictEqual(result, "'My''Table'");
+    });
+
+    test('should escape multiple single quotes', () => {
+      const result = SchemaService.quoteIdentifier("It's a 'test' table");
+
+      assert.strictEqual(result, "'It''s a ''test'' table'");
+    });
+
+    test('should handle empty string', () => {
+      const result = SchemaService.quoteIdentifier('');
+
+      assert.strictEqual(result, "''");
     });
   });
 });

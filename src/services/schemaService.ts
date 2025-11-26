@@ -42,22 +42,9 @@ export class SchemaService {
     const { schemaName, tableName, databaseName } = this.mssqlService.getTableInfo(node);
     const query = SchemaService.buildSchemaQuery(schemaName, tableName, databaseName);
 
-    // 除錯：輸出要執行的 SQL
-    console.log('Executing SQL query:', query);
-
     const results = await this.mssqlService.executeQuery<IColumnQueryResult>(node, query);
 
-    // 除錯：輸出原始查詢結果
-    console.log('Schema query results:', results);
-    console.log('Results length:', results.length);
-    if (results.length > 0) {
-      console.log('First row keys:', Object.keys(results[0]));
-      console.log('First row:', results[0]);
-    }
-
     const columns = results.map(SchemaService.parseColumnQueryResult);
-
-    // 除錯：輸出解析後的欄位
 
     return SchemaService.buildTableMetadata(schemaName, tableName, columns);
   }
@@ -66,8 +53,12 @@ export class SchemaService {
    * 建立查詢資料表結構的 SQL 語句
    */
   static buildSchemaQuery(schemaName: string, tableName: string, databaseName?: string): string {
-    // 如果有資料庫名稱，使用 USE 語句切換資料庫
-    const useDatabase = databaseName ? `USE [${databaseName}];\n` : '';
+    // 如果有資料庫名稱，使用 USE 語句切換資料庫，使用 QUOTENAME() 防止 SQL 注入
+    const useDatabase = databaseName ? `USE ${SchemaService.quoteIdentifier(databaseName)};\n` : '';
+    
+    // 使用 QUOTENAME() 函數進行 SQL Server 識別碼跳脫，防止 SQL 注入攻擊
+    const quotedSchema = SchemaService.quoteIdentifier(schemaName);
+    const quotedTable = SchemaService.quoteIdentifier(tableName);
     
     return `${useDatabase}SELECT 
     c.name AS column_name,
@@ -80,8 +71,20 @@ export class SchemaService {
     c.is_computed
 FROM sys.columns c
 INNER JOIN sys.types t ON c.user_type_id = t.user_type_id
-WHERE c.object_id = OBJECT_ID('[${schemaName}].[${tableName}]')
+WHERE c.object_id = OBJECT_ID(QUOTENAME(${quotedSchema}) + '.' + QUOTENAME(${quotedTable}))
 ORDER BY c.column_id;`.trim();
+  }
+
+  /**
+   * 對 SQL Server 識別碼進行跳脫，防止 SQL 注入
+   * 使用單引號包圍字串，並將內部的單引號替換為兩個單引號
+   * @param identifier 識別碼（資料庫名稱、Schema 名稱或資料表名稱）
+   * @returns 跳脫後的識別碼
+   */
+  static quoteIdentifier(identifier: string): string {
+    // 將單引號替換為兩個單引號以防止 SQL 注入
+    const escaped = identifier.replace(/'/g, "''");
+    return `'${escaped}'`;
   }
 
   /**
