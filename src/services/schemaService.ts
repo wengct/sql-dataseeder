@@ -80,8 +80,12 @@ ORDER BY c.column_id;`.trim();
   /**
    * 使用方括號包圍 SQL Server 識別碼，並跳脫內部的右方括號
    * 適用於 USE 語句等不支援 QUOTENAME() 的情況
+   * 
+   * 注意：依據 SQL Server 規範，方括號跳脫僅需要處理右方括號 (])，
+   * 因為左方括號 ([) 不需要跳脫。
+   * 
    * @param identifier 識別碼
-   * @returns 跳脫後的識別碼
+   * @returns 跳脫後的識別碼，格式為 [identifier]
    */
   static quoteBracketIdentifier(identifier: string): string {
     // 將右方括號替換為兩個右方括號以防止 SQL 注入
@@ -90,10 +94,12 @@ ORDER BY c.column_id;`.trim();
   }
 
   /**
-   * 將字串轉換為 SQL 字串字面值，供 QUOTENAME() 函數使用
+   * 將字串轉換為 SQL 字串字面值
+   * 此方法專門用於傳遞給 QUOTENAME() 函數使用
    * 使用單引號包圍字串，並將內部的單引號替換為兩個單引號
+   * 
    * @param value 字串值
-   * @returns SQL 字串字面值
+   * @returns SQL 字串字面值，格式為 'value'
    */
   static quoteStringLiteral(value: string): string {
     // 將單引號替換為兩個單引號以防止 SQL 注入
