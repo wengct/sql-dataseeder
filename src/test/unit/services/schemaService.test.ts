@@ -1,8 +1,7 @@
 import * as assert from 'assert';
 import { SqlDataType } from '../../../models/sqlDataType';
 import { ColumnMetadata } from '../../../models/columnMetadata';
-import { TableMetadata } from '../../../models/tableMetadata';
-import { SchemaService, IColumnQueryResult } from '../../../services/schemaService';
+import { SchemaService } from '../../../services/schemaService';
 
 suite('SchemaService', () => {
   suite('parseColumnQueryResult', () => {
