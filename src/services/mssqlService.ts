@@ -111,7 +111,7 @@ export class MssqlService {
     
     // 如果沒有 columnInfo，無法轉換
     if (!columnInfo || columnInfo.length === 0) {
-      throw new Error('Query result has no column information. Unable to parse query results.');
+      throw new Error(ErrorMessages.QUERY_RESULT_NO_COLUMNS);
     }
 
     return rows.map(row => {
