@@ -53,7 +53,8 @@ export class SchemaService {
    * 建立查詢資料表結構的 SQL 語句
    */
   static buildSchemaQuery(schemaName: string, tableName: string, databaseName?: string): string {
-    // 如果有資料庫名稱，使用 USE 語句切換資料庫，使用 QUOTENAME() 防止 SQL 注入
+    // 如果有資料庫名稱，使用 USE 語句切換資料庫
+    // USE 語句不支援 QUOTENAME()，故使用方括號跳脫 (bracket escaping) 防止 SQL 注入
     const useDatabase = databaseName ? `USE ${SchemaService.quoteBracketIdentifier(databaseName)};\n` : '';
     
     // 使用 QUOTENAME() 函數進行 SQL Server 識別碼跳脫，防止 SQL 注入攻擊
