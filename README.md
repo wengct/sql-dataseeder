@@ -6,7 +6,6 @@
 
 從 Object Explorer 的資料表節點右鍵選單，快速產生含有假資料的 INSERT 語法，並自動複製到剪貼簿。
 
-![Generate Insert Scripts](images/demo.gif)
 
 ### 主要特點
 
