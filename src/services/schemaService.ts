@@ -42,22 +42,9 @@ export class SchemaService {
     const { schemaName, tableName, databaseName } = this.mssqlService.getTableInfo(node);
     const query = SchemaService.buildSchemaQuery(schemaName, tableName, databaseName);
 
-    // 除錯：輸出要執行的 SQL
-    console.log('Executing SQL query:', query);
-
     const results = await this.mssqlService.executeQuery<IColumnQueryResult>(node, query);
 
-    // 除錯：輸出原始查詢結果
-    console.log('Schema query results:', results);
-    console.log('Results length:', results.length);
-    if (results.length > 0) {
-      console.log('First row keys:', Object.keys(results[0]));
-      console.log('First row:', results[0]);
-    }
-
     const columns = results.map(SchemaService.parseColumnQueryResult);
-
-    // 除錯：輸出解析後的欄位
 
     return SchemaService.buildTableMetadata(schemaName, tableName, columns);
   }
@@ -67,7 +54,13 @@ export class SchemaService {
    */
   static buildSchemaQuery(schemaName: string, tableName: string, databaseName?: string): string {
     // 如果有資料庫名稱，使用 USE 語句切換資料庫
-    const useDatabase = databaseName ? `USE [${databaseName}];\n` : '';
+    // USE 語句不支援 QUOTENAME()，故使用方括號跳脫 (bracket escaping) 防止 SQL 注入
+    const useDatabase = databaseName ? `USE ${SchemaService.quoteBracketIdentifier(databaseName)};\n` : '';
+    
+    // 使用 QUOTENAME() 函數進行 SQL Server 識別碼跳脫，防止 SQL 注入攻擊
+    // 將識別碼作為字串字面值傳入 QUOTENAME()，由 SQL Server 處理跳脫
+    const quotedSchema = SchemaService.quoteStringLiteral(schemaName);
+    const quotedTable = SchemaService.quoteStringLiteral(tableName);
     
     return `${useDatabase}SELECT 
     c.name AS column_name,
@@ -80,8 +73,38 @@ export class SchemaService {
     c.is_computed
 FROM sys.columns c
 INNER JOIN sys.types t ON c.user_type_id = t.user_type_id
-WHERE c.object_id = OBJECT_ID('[${schemaName}].[${tableName}]')
+WHERE c.object_id = OBJECT_ID(QUOTENAME(${quotedSchema}) + '.' + QUOTENAME(${quotedTable}))
 ORDER BY c.column_id;`.trim();
+  }
+
+  /**
+   * 使用方括號包圍 SQL Server 識別碼，並跳脫內部的右方括號
+   * 適用於 USE 語句等不支援 QUOTENAME() 的情況
+   * 
+   * 注意：依據 SQL Server 規範，方括號跳脫僅需要處理右方括號 (])，
+   * 因為左方括號 ([) 不需要跳脫。
+   * 
+   * @param identifier 識別碼
+   * @returns 跳脫後的識別碼，格式為 [identifier]
+   */
+  static quoteBracketIdentifier(identifier: string): string {
+    // 將右方括號替換為兩個右方括號以防止 SQL 注入
+    const escaped = identifier.replace(/]/g, ']]');
+    return `[${escaped}]`;
+  }
+
+  /**
+   * 將字串轉換為 SQL 字串字面值
+   * 此方法專門用於傳遞給 QUOTENAME() 函數使用
+   * 使用單引號包圍字串，並將內部的單引號替換為兩個單引號
+   * 
+   * @param value 字串值
+   * @returns SQL 字串字面值，格式為 'value'
+   */
+  static quoteStringLiteral(value: string): string {
+    // 將單引號替換為兩個單引號以防止 SQL 注入
+    const escaped = value.replace(/'/g, "''");
+    return `'${escaped}'`;
   }
 
   /**
