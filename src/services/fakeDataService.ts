@@ -66,6 +66,9 @@ export class FakeDataService {
         return this.generateBitValue();
       case SqlDataType.UNIQUEIDENTIFIER:
         return this.generateUniqueidentifierValue();
+      case SqlDataType.BINARY:
+      case SqlDataType.VARBINARY:
+        return this.generateBinaryValue(column.maxLength);
 
       default:
         // 不應該執行到這裡，因為 UNSUPPORTED 類型應該在呼叫前被過濾
@@ -256,6 +259,15 @@ export class FakeDataService {
   private generateUniqueidentifierValue(): string {
     const uuid = this.generateUUID();
     return `'${uuid}'`;
+  }
+
+  private generateBinaryValue(maxLength: number | null): string {
+    const byteLength = maxLength === null || maxLength === -1 ? 8 : Math.max(1, Math.min(maxLength, 8));
+    let hex = '';
+    for (let i = 0; i < byteLength; i++) {
+      hex += Math.floor(Math.random() * 256).toString(16).padStart(2, '0');
+    }
+    return `0x${hex}`;
   }
 
   /**

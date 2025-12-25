@@ -262,7 +262,7 @@ suite('FakeDataService', () => {
         'int', 'bigint', 'smallint', 'tinyint',
         'decimal', 'numeric', 'float', 'real',
         'datetime', 'datetime2', 'date', 'time',
-        'bit', 'uniqueidentifier'
+        'bit', 'uniqueidentifier', 'binary', 'varbinary'
       ];
 
       for (const type of supportedTypes) {
@@ -272,8 +272,8 @@ suite('FakeDataService', () => {
 
     test('should return false for unsupported types', () => {
       const unsupportedTypes = [
-        'geography', 'geometry', 'xml', 'varbinary',
-        'binary', 'image', 'text', 'ntext', 'sql_variant',
+        'geography', 'geometry', 'xml',
+        'image', 'text', 'ntext', 'sql_variant',
         'hierarchyid', 'timestamp', 'rowversion'
       ];
 

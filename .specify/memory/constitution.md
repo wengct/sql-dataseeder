@@ -1,17 +1,15 @@
 <!--
 ## Sync Impact Report
-- Version change: N/A → 1.0.0 (initial ratification)
-- Modified principles: N/A (initial version)
+- Version change: 1.0.0 → 1.1.0
+- Modified principles:
+  - Principle III: 增加對棕地專案（現有程式碼）的測試要求。
 - Added sections:
-  - Core Principles (5 principles)
-  - Technology Constraints
-  - Development Workflow
-  - Governance
+  - Principle VI: Brownfield Management (棕地專案管理)。
 - Removed sections: None
 - Templates requiring updates:
-  - `.specify/templates/plan-template.md` ✅ (Constitution Check section compatible)
-  - `.specify/templates/spec-template.md` ✅ (functional requirements aligned)
-  - `.specify/templates/tasks-template.md` ✅ (task categorization compatible)
+  - `.specify/templates/plan-template.md` ✅ (已確認相容)
+  - `.specify/templates/spec-template.md` ✅ (已確認相容)
+  - `.specify/templates/tasks-template.md` ✅ (已確認相容)
 - Follow-up TODOs: None
 -->
 
@@ -30,7 +28,7 @@
 **Rationale**: TypeScript 的型別系統可在編譯期捕獲錯誤，減少執行期異常，提高程式碼可維護性。
 
 ### III. Test-First Development
-新功能 MUST 先撰寫測試，測試 MUST 先失敗再實作功能。測試框架使用 Mocha + VS Code Test API。測試覆蓋率 SHOULD 達到 80% 以上。每個公開 API MUST 有對應的單元測試。
+新功能 MUST 先撰寫測試，測試 MUST 先失敗再實作功能。對於現有程式碼（棕地專案），在進行修改或重構時 MUST 補齊對應的單元測試。測試框架使用 Mocha + VS Code Test API。測試覆蓋率 SHOULD 達到 80% 以上。每個公開 API MUST 有對應的單元測試。
 
 **Rationale**: 測試先行確保功能符合規格，並建立回歸測試網，使重構更安全。
 
@@ -40,9 +38,14 @@
 **Rationale**: 明確的資料庫支援範圍可避免功能蔓延，確保核心功能的穩定性。
 
 ### V. User Experience Simplicity
-功能入口 MUST 直觀（右鍵選單）。預設值 MUST 合理（預設 10 筆）。結果 MUST 自動複製到剪貼簿並顯示通知。錯誤訊息 MUST 清楚說明問題並提供解決建議。
+功能入口 MUST 直觀（右鍵選單）。預設值 MUST 合理（依功能需求設定合適的預設筆數）。結果 MUST 自動複製到剪貼簿並顯示通知。錯誤訊息 MUST 清楚說明問題並提供解決建議。
 
 **Rationale**: 工具的價值在於節省時間，複雜的操作流程會抵消生產力增益。
+
+### VI. Brownfield Management
+作為棕地專案，MUST 優先處理技術債。在實作新功能時，若遇到不符合現行架構或型別規範的舊程式碼，SHOULD 進行「童子軍規則」式的重構（離開時比進來時更乾淨）。所有重構 MUST 確保不破壞現有功能。
+
+**Rationale**: 持續改進舊有程式碼可防止專案腐化，並確保長期可維護性。
 
 ## Technology Constraints
 
@@ -75,4 +78,4 @@
   - PATCH: 澄清、措辭修正、非語義變更
 - 複雜度增加 MUST 在 plan.md 的 Complexity Tracking 區段說明理由
 
-**Version**: 1.0.0 | **Ratified**: 2025-11-25 | **Last Amended**: 2025-11-25
+**Version**: 1.1.0 | **Ratified**: 2025-11-25 | **Last Amended**: 2025-12-24

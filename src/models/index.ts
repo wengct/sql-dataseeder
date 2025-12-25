@@ -3,6 +3,13 @@ export { SqlDataType, SUPPORTED_DATA_TYPES, parseSqlDataType } from './sqlDataTy
 export { ColumnMetadata, isColumnSupported, isColumnInsertable } from './columnMetadata';
 export { TableMetadata, getFullTableName, getInsertableColumns } from './tableMetadata';
 export {
+  IExistingDataOptions,
+  IQueryCell,
+  IQueryRow,
+  IDataQuery,
+  IExistingDataGenerationResult
+} from './existingDataTypes';
+export {
   GenerationOptions,
   GenerationResult,
   createSuccessResult,

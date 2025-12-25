@@ -33,7 +33,8 @@ suite('InsertScriptGenerator', () => {
   const createTable = (columns: ColumnMetadata[]): TableMetadata => ({
     schemaName: 'dbo',
     tableName: 'TestTable',
-    columns
+    columns,
+    hasIdentityColumn: columns.some(c => c.isIdentity)
   });
 
   suite('generate', () => {
@@ -57,7 +58,8 @@ suite('InsertScriptGenerator', () => {
       const table: TableMetadata = {
         schemaName: 'sales',
         tableName: 'Orders',
-        columns: [createColumn('OrderId', SqlDataType.INT)]
+        columns: [createColumn('OrderId', SqlDataType.INT)],
+        hasIdentityColumn: false
       };
       const options: GenerationOptions = { rowCount: 1 };
 
@@ -269,7 +271,8 @@ suite('InsertScriptGenerator', () => {
       const table: TableMetadata = {
         schemaName: 'My Schema',
         tableName: 'My Table',
-        columns: [createColumn('Value', SqlDataType.INT)]
+        columns: [createColumn('Value', SqlDataType.INT)],
+        hasIdentityColumn: false
       };
       const options: GenerationOptions = { rowCount: 1 };
 

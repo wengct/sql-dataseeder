@@ -46,7 +46,7 @@ export class SchemaService {
 
     const columns = results.map(SchemaService.parseColumnQueryResult);
 
-    return SchemaService.buildTableMetadata(schemaName, tableName, columns);
+    return SchemaService.buildTableMetadata(schemaName, tableName, columns, databaseName);
   }
 
   /**
@@ -199,12 +199,15 @@ ORDER BY c.column_id;`.trim();
   static buildTableMetadata(
     schemaName: string,
     tableName: string,
-    columns: ColumnMetadata[]
+    columns: ColumnMetadata[],
+    databaseName?: string
   ): TableMetadata {
     return {
       schemaName,
       tableName,
-      columns
+      databaseName,
+      columns,
+      hasIdentityColumn: columns.some(col => col.isIdentity)
     };
   }
 }
