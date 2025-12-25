@@ -34,6 +34,8 @@ suite('SqlDataType', () => {
     test('should have other supported types defined', () => {
       assert.strictEqual(SqlDataType.BIT, 'bit');
       assert.strictEqual(SqlDataType.UNIQUEIDENTIFIER, 'uniqueidentifier');
+      assert.strictEqual(SqlDataType.BINARY, 'binary');
+      assert.strictEqual(SqlDataType.VARBINARY, 'varbinary');
     });
 
     test('should have UNSUPPORTED type defined', () => {
@@ -48,7 +50,7 @@ suite('SqlDataType', () => {
         'int', 'bigint', 'smallint', 'tinyint',
         'decimal', 'numeric', 'float', 'real',
         'datetime', 'datetime2', 'date', 'time',
-        'bit', 'uniqueidentifier'
+        'bit', 'uniqueidentifier', 'binary', 'varbinary'
       ];
       
       for (const type of expectedTypes) {
@@ -66,8 +68,8 @@ suite('SqlDataType', () => {
       );
     });
 
-    test('should have exactly 18 supported types', () => {
-      assert.strictEqual(SUPPORTED_DATA_TYPES.length, 18);
+    test('should have exactly 20 supported types', () => {
+      assert.strictEqual(SUPPORTED_DATA_TYPES.length, 20);
     });
   });
 
@@ -79,6 +81,7 @@ suite('SqlDataType', () => {
       assert.strictEqual(parseSqlDataType('datetime'), SqlDataType.DATETIME);
       assert.strictEqual(parseSqlDataType('bit'), SqlDataType.BIT);
       assert.strictEqual(parseSqlDataType('uniqueidentifier'), SqlDataType.UNIQUEIDENTIFIER);
+      assert.strictEqual(parseSqlDataType('varbinary'), SqlDataType.VARBINARY);
     });
 
     test('should be case-insensitive', () => {
@@ -90,7 +93,6 @@ suite('SqlDataType', () => {
     test('should return UNSUPPORTED for unknown types', () => {
       assert.strictEqual(parseSqlDataType('geography'), SqlDataType.UNSUPPORTED);
       assert.strictEqual(parseSqlDataType('xml'), SqlDataType.UNSUPPORTED);
-      assert.strictEqual(parseSqlDataType('varbinary'), SqlDataType.UNSUPPORTED);
       assert.strictEqual(parseSqlDataType('text'), SqlDataType.UNSUPPORTED);
       assert.strictEqual(parseSqlDataType('image'), SqlDataType.UNSUPPORTED);
       assert.strictEqual(parseSqlDataType('unknown_type'), SqlDataType.UNSUPPORTED);

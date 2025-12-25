@@ -1,6 +1,7 @@
 // The module 'vscode' contains the VS Code extensibility API
 import * as vscode from 'vscode';
 import { generateInsertScripts } from './commands/generateInsertScripts';
+import { generateExistingInsertScripts } from './commands/generateExistingInsertScripts';
 
 // This method is called when your extension is activated
 export function activate(context: vscode.ExtensionContext) {
@@ -12,7 +13,12 @@ export function activate(context: vscode.ExtensionContext) {
 		generateInsertScripts
 	);
 
-	context.subscriptions.push(generateInsertScriptsCommand);
+	const generateExistingInsertScriptsCommand = vscode.commands.registerCommand(
+		'sql-dataseeder.generateExistingInsertScripts',
+		generateExistingInsertScripts
+	);
+
+	context.subscriptions.push(generateInsertScriptsCommand, generateExistingInsertScriptsCommand);
 }
 
 // This method is called when your extension is deactivated

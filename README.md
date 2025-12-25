@@ -4,7 +4,10 @@
 
 ## 功能
 
-從 Object Explorer 的資料表節點右鍵選單，快速產生含有假資料的 INSERT 語法，並自動複製到剪貼簿。
+從 Object Explorer 的資料表節點右鍵選單：
+
+- **Generate Insert Scripts**: 產生含有假資料的 INSERT 語法
+- **Generate Existing Insert Scripts**: 從資料表現有資料產生可執行的 INSERT 語法
 
 
 ### 主要特點
@@ -24,8 +27,14 @@
 1. 在 VS Code 側邊欄開啟 SQL Server Object Explorer
 2. 展開資料庫 → Tables
 3. 在目標資料表上**點擊右鍵**
-4. 選擇「**Generate Insert Scripts**」
-5. 輸入要產生的筆數（預設 10 筆，最大 1000 筆）
+4. 選擇功能：
+   - **Generate Insert Scripts**：產生假資料 INSERT 語法
+   - **Generate Existing Insert Scripts**：從現有資料產生 INSERT 語法
+5. 依提示輸入選項：
+   - **筆數**：預設 100 筆
+   - **WHERE 條件**（選填）：不含 WHERE 關鍵字
+   - **ORDER BY**（選填）：不含 ORDER BY 關鍵字
+   - **IDENTITY 欄位**：若資料表有 IDENTITY 欄位，可選擇是否包含
 6. INSERT 語法已複製到剪貼簿，直接貼上使用！
 
 ## 範例輸出
@@ -38,23 +47,24 @@ INSERT INTO [dbo].[Users] ([Name], [Email], [Age], [CreatedAt]) VALUES ('Mn3bVc5
 
 ## 支援的資料類型
 
-| 類型 | 產生的值範例 |
-|------|-------------|
-| varchar, nvarchar, char, nchar | `'xK9pLm'` (英數字元) |
-| int, bigint, smallint, tinyint | `12345` |
-| decimal, numeric | `123.45` |
-| float, real | `123.4567` |
-| datetime, datetime2 | `'2025-01-15 10:30:00.123'` |
-| date | `'2025-01-15'` |
-| time | `'10:30:00'` |
-| bit | `0` 或 `1` |
-| uniqueidentifier | `'a1b2c3d4-e5f6-4890-abcd-ef1234567890'` |
+| 類型 | 產生的值範例 | 說明 |
+|------|-------------|------|
+| varchar, nvarchar, char, nchar | `'xK9pLm'`、`N'中文'` | Unicode 類型自動加 N 前綴 |
+| int, bigint, smallint, tinyint | `12345` | 整數類型 |
+| decimal, numeric | `123.45` | 精確數值類型 |
+| float, real | `123.4567` | 浮點數類型 |
+| datetime, datetime2 | `'2025-01-15 10:30:00.123'` | 日期時間類型 |
+| date | `'2025-01-15'` | 僅日期 |
+| time | `'10:30:00'` | 僅時間 |
+| bit | `0` 或 `1` | 布林類型 |
+| uniqueidentifier | `'a1b2c3d4-e5f6-4890-abcd-ef1234567890'` | GUID |
+| binary, varbinary | `0x48656C6C6F` | 二進位資料（十六進位格式） |
 
 ## 自動排除的欄位
 
 - **IDENTITY 欄位**: 自動遞增欄位不會出現在 INSERT 語法中
 - **COMPUTED 欄位**: 計算欄位不會出現在 INSERT 語法中
-- **不支援的資料類型**: geography、geometry、xml、varbinary、image、text、ntext、sql_variant、hierarchyid、timestamp/rowversion
+- **不支援的資料類型**: geography、geometry、xml、image、text、ntext、sql_variant、hierarchyid、timestamp/rowversion
 
 ## 常見問題
 
@@ -74,10 +84,19 @@ INSERT INTO [dbo].[Users] ([Name], [Email], [Age], [CreatedAt]) VALUES ('Mn3bVc5
 
 ## Release Notes
 
+### 0.1.0
+
+- 新增「Generate Existing Insert Scripts」功能
+  - 從資料表現有資料產生 INSERT 語法
+  - 支援 WHERE 條件篩選與 ORDER BY 排序
+  - 支援 IDENTITY 欄位選項
+- 新增 binary/varbinary 資料類型支援
+- 支援 20 種 SQL Server 資料類型
+
 ### 0.0.1
 
 - 初始版本
-- 支援 18 種 SQL Server 資料類型
+- Generate Insert Scripts：產生假資料 INSERT 語法
 - 右鍵選單整合
 - 自動複製到剪貼簿
 

@@ -10,8 +10,14 @@ export interface TableMetadata {
   /** 資料表名稱 */
   readonly tableName: string;
 
+  /** 資料庫名稱（可選） */
+  readonly databaseName?: string;
+
   /** 所有欄位的結構資訊 */
   readonly columns: readonly ColumnMetadata[];
+
+  /** 是否包含 IDENTITY 欄位 */
+  readonly hasIdentityColumn: boolean;
 }
 
 /**

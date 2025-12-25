@@ -1,4 +1,5 @@
 import * as vscode from 'vscode';
+import { IQueryRow } from '../models/existingDataTypes';
 import { ErrorMessages, formatErrorMessage } from '../utils/errorMessages';
 
 /**
@@ -218,6 +219,60 @@ export class MssqlService {
       return parsedRows as T[];
     } catch (queryError) {
       throw new Error(formatErrorMessage(ErrorMessages.QUERY_FAILED, queryError));
+    }
+  }
+
+  /**
+   * Query table data and return cell objects (includes invariantCultureDisplayValue).
+   */
+  async queryTableData(node: unknown, query: string): Promise<IQueryRow[]> {
+    const treeNode = node as ITreeNodeInfo;
+    const nodeObj = node as Record<string, unknown>;
+
+    if (!treeNode.connectionProfile) {
+      const connProfile = nodeObj._connectionProfile as IConnectionProfile;
+      if (!connProfile) {
+        throw new Error(ErrorMessages.NO_CONNECTION);
+      }
+    }
+
+    const connectionProfile = treeNode.connectionProfile || (nodeObj._connectionProfile as IConnectionProfile);
+    if (!connectionProfile) {
+      throw new Error(ErrorMessages.NO_CONNECTION);
+    }
+
+    const api = await this.getApi();
+
+    const connectionUri = await api.connectionSharing.connect(
+      MssqlService.EXTENSION_ID,
+      connectionProfile.id
+    );
+
+    if (!connectionUri) {
+      throw new Error(ErrorMessages.CONNECTION_FAILED);
+    }
+
+    try {
+      const result = await api.connectionSharing.executeSimpleQuery(connectionUri, query);
+
+      if (!result.columnInfo || result.columnInfo.length === 0) {
+        throw new Error(ErrorMessages.QUERY_RESULT_NO_COLUMNS);
+      }
+
+      return result.rows.map(row => {
+        const obj: Record<string, any> = {};
+        result.columnInfo.forEach((col, index) => {
+          const cell = row[index];
+          if (cell) {
+            obj[col.columnName] = cell;
+          } else {
+            obj[col.columnName] = { displayValue: '', isNull: true };
+          }
+        });
+        return obj as IQueryRow;
+      });
+    } catch (queryError) {
+      throw new Error(formatErrorMessage(ErrorMessages.DATA_QUERY_FAILED, queryError));
     }
   }
 }

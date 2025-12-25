@@ -299,6 +299,25 @@ suite('SchemaService', () => {
       assert.strictEqual(table.tableName, 'Users');
       assert.strictEqual(table.columns.length, 2);
     });
+
+    test('should include database name when provided', () => {
+      const columns: ColumnMetadata[] = [
+        {
+          name: 'Id',
+          dataType: SqlDataType.INT,
+          maxLength: null,
+          precision: null,
+          scale: null,
+          isNullable: false,
+          isIdentity: true,
+          isComputed: false
+        }
+      ];
+
+      const table = SchemaService.buildTableMetadata('dbo', 'Users', columns, 'MyDb');
+
+      assert.strictEqual(table.databaseName, 'MyDb');
+    });
   });
 
   suite('buildSchemaQuery', () => {

@@ -29,6 +29,8 @@ export enum SqlDataType {
   // 其他類型
   BIT = 'bit',
   UNIQUEIDENTIFIER = 'uniqueidentifier',
+  BINARY = 'binary',
+  VARBINARY = 'varbinary',
 
   // 不支援的類型
   UNSUPPORTED = 'unsupported'
@@ -55,7 +57,9 @@ export const SUPPORTED_DATA_TYPES: readonly SqlDataType[] = [
   SqlDataType.DATE,
   SqlDataType.TIME,
   SqlDataType.BIT,
-  SqlDataType.UNIQUEIDENTIFIER
+  SqlDataType.UNIQUEIDENTIFIER,
+  SqlDataType.BINARY,
+  SqlDataType.VARBINARY
 ] as const;
 
 /**

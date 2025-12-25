@@ -24,7 +24,8 @@ suite('TableMetadata', () => {
       const table: TableMetadata = {
         schemaName: 'dbo',
         tableName: 'Users',
-        columns: []
+        columns: [],
+        hasIdentityColumn: false
       };
 
       assert.strictEqual(getFullTableName(table), '[dbo].[Users]');
@@ -34,7 +35,8 @@ suite('TableMetadata', () => {
       const table: TableMetadata = {
         schemaName: 'sales',
         tableName: 'Orders',
-        columns: []
+        columns: [],
+        hasIdentityColumn: false
       };
 
       assert.strictEqual(getFullTableName(table), '[sales].[Orders]');
@@ -44,7 +46,8 @@ suite('TableMetadata', () => {
       const table: TableMetadata = {
         schemaName: 'dbo',
         tableName: 'User Details',
-        columns: []
+        columns: [],
+        hasIdentityColumn: false
       };
 
       assert.strictEqual(getFullTableName(table), '[dbo].[User Details]');
@@ -62,7 +65,8 @@ suite('TableMetadata', () => {
       const table: TableMetadata = {
         schemaName: 'dbo',
         tableName: 'Users',
-        columns
+        columns,
+        hasIdentityColumn: false
       };
 
       const insertable = getInsertableColumns(table);
@@ -80,7 +84,8 @@ suite('TableMetadata', () => {
       const table: TableMetadata = {
         schemaName: 'dbo',
         tableName: 'Users',
-        columns
+        columns,
+        hasIdentityColumn: columns.some(c => c.isIdentity)
       };
 
       const insertable = getInsertableColumns(table);
@@ -98,7 +103,8 @@ suite('TableMetadata', () => {
       const table: TableMetadata = {
         schemaName: 'dbo',
         tableName: 'Users',
-        columns
+        columns,
+        hasIdentityColumn: columns.some(c => c.isIdentity)
       };
 
       const insertable = getInsertableColumns(table);
@@ -116,7 +122,8 @@ suite('TableMetadata', () => {
       const table: TableMetadata = {
         schemaName: 'dbo',
         tableName: 'Places',
-        columns
+        columns,
+        hasIdentityColumn: columns.some(c => c.isIdentity)
       };
 
       const insertable = getInsertableColumns(table);
@@ -136,7 +143,8 @@ suite('TableMetadata', () => {
       const table: TableMetadata = {
         schemaName: 'dbo',
         tableName: 'Users',
-        columns
+        columns,
+        hasIdentityColumn: columns.some(c => c.isIdentity)
       };
 
       const insertable = getInsertableColumns(table);
@@ -153,7 +161,8 @@ suite('TableMetadata', () => {
       const table: TableMetadata = {
         schemaName: 'dbo',
         tableName: 'Special',
-        columns
+        columns,
+        hasIdentityColumn: columns.some(c => c.isIdentity)
       };
 
       const insertable = getInsertableColumns(table);
@@ -171,7 +180,8 @@ suite('TableMetadata', () => {
       const table: TableMetadata = {
         schemaName: 'dbo',
         tableName: 'Users',
-        columns
+        columns,
+        hasIdentityColumn: columns.some(c => c.isIdentity)
       };
 
       const insertable = getInsertableColumns(table);
@@ -189,7 +199,8 @@ suite('TableMetadata', () => {
       const table: TableMetadata = {
         schemaName: 'sales',
         tableName: 'Customers',
-        columns
+        columns,
+        hasIdentityColumn: columns.some(c => c.isIdentity)
       };
 
       assert.strictEqual(table.schemaName, 'sales');

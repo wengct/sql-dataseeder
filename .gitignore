@@ -3,3 +3,13 @@ dist
 node_modules
 .vscode-test/
 *.vsix
+
+# logs & env
+*.log
+.env*
+
+# OS/editor
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/

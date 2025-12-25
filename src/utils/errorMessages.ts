@@ -18,7 +18,7 @@ export const ErrorMessages = {
   ACCESS_DENIED: (tableName: string) => `Access denied to table ${tableName}. Please ensure you have SELECT permission on this table.`,
 
   // 輸入驗證
-  INVALID_ROW_COUNT: 'Invalid row count. Please enter a positive integer.',
+  INVALID_ROW_COUNT: 'Invalid row count. Row count must be a positive integer.',
   ROW_COUNT_TOO_LARGE: (max: number) => `Row count too large. Maximum allowed is ${max}.`,
 
   // 資料表相關
@@ -27,8 +27,14 @@ export const ErrorMessages = {
 
   // 查詢相關
   QUERY_FAILED: 'Failed to query table structure. Please try again.',
+  DATA_QUERY_FAILED: 'Failed to query table data. Please try again.',
   QUERY_TIMEOUT: 'Query timed out. Please try again.',
   QUERY_RESULT_NO_COLUMNS: 'Query result has no column information. The query may have returned an empty result set.',
+  TABLE_EMPTY: (tableName: string) => `Table ${tableName} has no data.`,
+  QUERY_NO_RESULTS: 'No data matching the specified conditions.',
+  QUERY_SYNTAX_ERROR: (error: string) => `Query failed: ${error}. Please check your WHERE/ORDER BY clause.`,
+  UNSAFE_SQL_CLAUSE: (clauseType: 'WHERE' | 'ORDER BY') =>
+    `${clauseType} clause contains potentially dangerous SQL. Avoid statements like DROP, DELETE, INSERT, UPDATE, ALTER, TRUNCATE, EXEC, CREATE, comments, or statement separators.`,
 
   // 一般錯誤
   UNKNOWN_ERROR: 'An unknown error occurred. Please try again.',
