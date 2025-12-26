@@ -1,0 +1,42 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://sql-dataseeder.local/schemas/custom-keyword-values-settings.json",
+  "title": "SQL DataSeeder - Custom Keyword Values Settings",
+  "type": "object",
+  "properties": {
+    "sqlDataSeeder.customKeywordValues.rules": {
+      "type": "array",
+      "default": [],
+      "description": "欄位名稱匹配規則 → 固定值（產生時優先套用）",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["pattern", "matchType", "value"],
+        "properties": {
+          "pattern": {
+            "type": "string",
+            "minLength": 1,
+            "description": "欄位名稱匹配模式（只比對 column name，不含表名）"
+          },
+          "matchType": {
+            "type": "string",
+            "enum": ["literal", "regex"],
+            "description": "literal=不分大小寫 contains；regex=不分大小寫正規表達式"
+          },
+          "value": {
+            "type": ["string", "number", "null"],
+            "description": "固定值（literal）；null→NULL，number→直接輸出，string→自動加引號並跳脫；不支援 raw SQL"
+          }
+        }
+      },
+      "examples": [
+        [
+          { "pattern": "tenantid", "matchType": "literal", "value": 1 },
+          { "pattern": "^is_", "matchType": "regex", "value": 0 },
+          { "pattern": "createdat", "matchType": "literal", "value": null }
+        ]
+      ]
+    }
+  },
+  "additionalProperties": true
+}

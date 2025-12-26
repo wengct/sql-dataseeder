@@ -68,3 +68,23 @@ export function formatValueForSql(cell: IQueryCell, column: ColumnMetadata): str
       return `'${escapeSqlString(value)}'`;
   }
 }
+
+export function formatCustomKeywordValueForSql(value: string | number | null, column: ColumnMetadata): string {
+  if (value === null) {
+    return 'NULL';
+  }
+
+  if (typeof value === 'number') {
+    return value.toString();
+  }
+
+  const escaped = escapeSqlString(value);
+  switch (column.dataType) {
+    case SqlDataType.NVARCHAR:
+    case SqlDataType.NCHAR:
+      return `N'${escaped}'`;
+
+    default:
+      return `'${escaped}'`;
+  }
+}

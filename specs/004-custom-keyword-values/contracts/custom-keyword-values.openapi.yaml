@@ -1,0 +1,85 @@
+openapi: 3.0.3
+info:
+  title: SQL DataSeeder - Custom Keyword Values (Conceptual Contract)
+  version: 0.1.0
+  description: |
+    本 OpenAPI 為「概念性合約」，用來描述擴充套件在產生 INSERT 腳本時的輸入/輸出資料結構，
+    以輔助測試與設計溝通（本專案並無實際 HTTP API）。
+paths:
+  /generate/insert-script:
+    post:
+      operationId: generateInsertScript
+      summary: 產生 INSERT 腳本（含固定值規則優先套用）
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/GenerateInsertScriptRequest'
+      responses:
+        '200':
+          description: 成功產生
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GenerateInsertScriptResponse'
+components:
+  schemas:
+    CustomKeywordValueRule:
+      type: object
+      additionalProperties: false
+      required: [pattern, matchType, value]
+      properties:
+        pattern:
+          type: string
+          minLength: 1
+        matchType:
+          type: string
+          enum: [literal, regex]
+        value:
+          nullable: true
+          oneOf:
+            - type: string
+            - type: number
+            - type: 'null'
+    TableRef:
+      type: object
+      additionalProperties: false
+      required: [schemaName, tableName]
+      properties:
+        databaseName:
+          type: string
+        schemaName:
+          type: string
+        tableName:
+          type: string
+    GenerateInsertScriptRequest:
+      type: object
+      additionalProperties: false
+      required: [table, rowCount]
+      properties:
+        table:
+          $ref: '#/components/schemas/TableRef'
+        rowCount:
+          type: integer
+          minimum: 1
+          maximum: 1000
+        customKeywordValueRules:
+          type: array
+          items:
+            $ref: '#/components/schemas/CustomKeywordValueRule'
+          description: |
+            可選：若提供則代表「本次執行時」要套用的規則；
+            實作上通常來自 VS Code 設定。
+    GenerateInsertScriptResponse:
+      type: object
+      additionalProperties: false
+      required: [script, warnings]
+      properties:
+        script:
+          type: string
+        warnings:
+          type: array
+          items:
+            type: string
+          description: 例如無效規則、無效 regex 被忽略等診斷訊息
