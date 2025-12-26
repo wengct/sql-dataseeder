@@ -16,3 +16,14 @@ export {
   createErrorResult,
   DEFAULT_GENERATION_OPTIONS
 } from './generationTypes';
+
+export {
+  FieldCategory,
+  FakerMethodId,
+  FieldPattern,
+  FieldMatchResult,
+  FakerConfig,
+  FakerLocale,
+  DEFAULT_FAKER_CONFIG,
+  DEFAULT_FIELD_PATTERNS
+} from './fieldPattern';

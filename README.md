@@ -14,7 +14,7 @@
 
 - 🎯 **一鍵產生**: 右鍵選單直接呼叫，無需複雜設定
 - 📋 **自動複製**: 產生的 INSERT 語法自動複製到剪貼簿
-- 🎲 **智慧假資料**: 根據欄位類型自動產生合適的假資料
+- 🧠 **智慧假資料 (Faker.js)**: 依欄位名稱語意產生更真實的字串資料（Email、姓名、電話、地址等）
 - ⚡ **高效能**: 100 筆 INSERT 語法在 2 秒內完成
 
 ## 先決條件
@@ -40,9 +40,9 @@
 ## 範例輸出
 
 ```sql
-INSERT INTO [dbo].[Users] ([Name], [Email], [Age], [CreatedAt]) VALUES ('xK9pLm2w', N'abc123def', 25, '2025-01-15 10:30:00.123');
-INSERT INTO [dbo].[Users] ([Name], [Email], [Age], [CreatedAt]) VALUES ('Qw2rTy8x', N'def456ghi', 32, '2025-02-20 14:45:00.456');
-INSERT INTO [dbo].[Users] ([Name], [Email], [Age], [CreatedAt]) VALUES ('Mn3bVc5z', N'ghi789jkl', 28, '2025-03-10 09:15:00.789');
+INSERT INTO [dbo].[Users] ([Name], [Email], [Age], [CreatedAt]) VALUES ('John Doe', N'john@example.com', 25, '2025-01-15 10:30:00.123');
+INSERT INTO [dbo].[Users] ([Name], [Email], [Age], [CreatedAt]) VALUES ('Jane Smith', N'jane.smith@example.com', 32, '2025-02-20 14:45:00.456');
+INSERT INTO [dbo].[Users] ([Name], [Email], [Age], [CreatedAt]) VALUES ('Alex Wang', N'alex.wang@example.com', 28, '2025-03-10 09:15:00.789');
 ```
 
 ## 支援的資料類型
@@ -66,6 +66,13 @@ INSERT INTO [dbo].[Users] ([Name], [Email], [Age], [CreatedAt]) VALUES ('Mn3bVc5
 - **COMPUTED 欄位**: 計算欄位不會出現在 INSERT 語法中
 - **不支援的資料類型**: geography、geometry、xml、image、text、ntext、sql_variant、hierarchyid、timestamp/rowversion
 
+## Faker.js 設定
+
+此功能預設啟用，僅影響字串類型（varchar/nvarchar）。若欄位名稱無法識別，會自動退回原本的隨機英數字串。
+
+- `sqlDataSeeder.faker.enabled`: 是否啟用（預設 true）
+- `sqlDataSeeder.faker.locale`: `en` 或 `zh_TW`（預設 en）
+
 ## 常見問題
 
 ### 看不到「Generate Insert Scripts」選項？
@@ -83,6 +90,11 @@ INSERT INTO [dbo].[Users] ([Name], [Email], [Age], [CreatedAt]) VALUES ('Mn3bVc5
 該欄位可能是 IDENTITY、COMPUTED 或不支援的資料類型。成功通知中會說明哪些欄位被跳過。
 
 ## Release Notes
+
+### 0.1.1
+
+- 新增 Faker.js 智慧假資料：依欄位名稱語意產生更真實的字串資料
+- 新增設定：`sqlDataSeeder.faker.enabled`、`sqlDataSeeder.faker.locale`
 
 ### 0.1.0
 

@@ -5,6 +5,8 @@ Auto-generated from all feature plans. Last updated: 2025-11-25
 ## Active Technologies
 - TypeScript 5.x（嚴格模式） + VS Code Extension API, mssql 擴充套件 (ms-mssql.mssql) (002-existing-data-insert)
 - N/A（透過 mssql 擴充套件連線至 SQL Server） (002-existing-data-insert)
+- TypeScript 5.x，嚴格模式 (strict: true) + @faker-js/faker v9.x（新增）、VS Code Extension API ^1.106.1、ms-mssql.mssql (003-faker-integration)
+- N/A（無資料持久化，所有設定透過 VS Code 設定 API） (003-faker-integration)
 
 - TypeScript 5.9.3，嚴格模式 (strict: true) + VS Code Extension API ^1.106.1, vscode-mssql (連線共享 API) (001-generate-insert-scripts)
 
@@ -24,6 +26,7 @@ npm test; npm run lint
 TypeScript 5.9.3，嚴格模式 (strict: true): Follow standard conventions
 
 ## Recent Changes
+- 003-faker-integration: Added TypeScript 5.x，嚴格模式 (strict: true) + @faker-js/faker v9.x（新增）、VS Code Extension API ^1.106.1、ms-mssql.mssql
 - 002-existing-data-insert: Added TypeScript 5.x（嚴格模式） + VS Code Extension API, mssql 擴充套件 (ms-mssql.mssql)
 
 - 001-generate-insert-scripts: Added TypeScript 5.9.3，嚴格模式 (strict: true) + VS Code Extension API ^1.106.1, vscode-mssql (連線共享 API)

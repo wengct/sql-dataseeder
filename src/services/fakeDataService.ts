@@ -1,6 +1,10 @@
-import { SqlDataType, SUPPORTED_DATA_TYPES, parseSqlDataType } from '../models/sqlDataType';
+import { Faker, base, en, zh_TW } from '@faker-js/faker';
 import { ColumnMetadata } from '../models/columnMetadata';
+import { FakerLocale, FakerMethodId } from '../models/fieldPattern';
+import { SqlDataType, SUPPORTED_DATA_TYPES, parseSqlDataType } from '../models/sqlDataType';
 import { escapeSqlString } from '../utils/sqlEscape';
+import { FakerConfigService } from './fakerConfigService';
+import { FieldPatternMatcher } from './fieldPatternMatcher';
 
 /**
  * 假資料產生服務
@@ -16,6 +20,21 @@ export class FakeDataService {
   /** 預設字串長度 */
   private static readonly DEFAULT_STRING_LENGTH = 10;
 
+  private readonly fieldPatternMatcher: Pick<FieldPatternMatcher, 'match'>;
+  private readonly fakerConfigService: Pick<FakerConfigService, 'isEnabled' | 'getLocale'>;
+  private readonly fakerFactory: (locale: FakerLocale) => Faker;
+  private readonly fakerCache = new Map<FakerLocale, Faker>();
+
+  constructor(
+    fieldPatternMatcher: Pick<FieldPatternMatcher, 'match'> = new FieldPatternMatcher(),
+    fakerConfigService: Pick<FakerConfigService, 'isEnabled' | 'getLocale'> = new FakerConfigService(),
+    fakerFactory: (locale: FakerLocale) => Faker = FakeDataService.createFakerInstance
+  ) {
+    this.fieldPatternMatcher = fieldPatternMatcher;
+    this.fakerConfigService = fakerConfigService;
+    this.fakerFactory = fakerFactory;
+  }
+
   /**
    * 為指定欄位產生假資料
    * @param column 欄位結構資訊
@@ -25,13 +44,13 @@ export class FakeDataService {
     switch (column.dataType) {
       // 字串類型
       case SqlDataType.VARCHAR:
-        return this.generateVarcharValue(column.maxLength);
+        return this.generateVarcharValue(column);
       case SqlDataType.NVARCHAR:
-        return this.generateNvarcharValue(column.maxLength);
+        return this.generateNvarcharValue(column);
       case SqlDataType.CHAR:
-        return this.generateCharValue(column.maxLength);
+        return this.generateCharValue(column);
       case SqlDataType.NCHAR:
-        return this.generateNcharValue(column.maxLength);
+        return this.generateNcharValue(column);
 
       // 整數類型
       case SqlDataType.INT:
@@ -90,28 +109,114 @@ export class FakeDataService {
   // 字串類型產生器
   // ============================================
 
-  private generateVarcharValue(maxLength: number | null): string {
-    const length = this.calculateStringLength(maxLength, false);
+  private generateVarcharValue(column: ColumnMetadata): string {
+    const fakerValue = this.tryGenerateFakerValue(column);
+    if (fakerValue !== null) {
+      const value = this.truncateToMaxLength(fakerValue, column.maxLength);
+      return `'${escapeSqlString(value)}'`;
+    }
+
+    const length = this.calculateStringLength(column.maxLength, false);
     const value = this.generateRandomString(length);
     return `'${escapeSqlString(value)}'`;
   }
 
-  private generateNvarcharValue(maxLength: number | null): string {
-    const length = this.calculateStringLength(maxLength, false);
+  private generateNvarcharValue(column: ColumnMetadata): string {
+    const fakerValue = this.tryGenerateFakerValue(column);
+    if (fakerValue !== null) {
+      const value = this.truncateToMaxLength(fakerValue, column.maxLength);
+      return `N'${escapeSqlString(value)}'`;
+    }
+
+    const length = this.calculateStringLength(column.maxLength, false);
     const value = this.generateRandomString(length);
     return `N'${escapeSqlString(value)}'`;
   }
 
-  private generateCharValue(maxLength: number | null): string {
-    const length = this.calculateStringLength(maxLength, true);
+  private generateCharValue(column: ColumnMetadata): string {
+    const length = this.calculateStringLength(column.maxLength, true);
     const value = this.generateRandomString(length);
     return `'${escapeSqlString(value)}'`;
   }
 
-  private generateNcharValue(maxLength: number | null): string {
-    const length = this.calculateStringLength(maxLength, true);
+  private generateNcharValue(column: ColumnMetadata): string {
+    const length = this.calculateStringLength(column.maxLength, true);
     const value = this.generateRandomString(length);
     return `N'${escapeSqlString(value)}'`;
+  }
+
+  private getFaker(locale: FakerLocale): Faker {
+    const cached = this.fakerCache.get(locale);
+    if (cached) {
+      return cached;
+    }
+
+    const faker = this.fakerFactory(locale);
+    this.fakerCache.set(locale, faker);
+    return faker;
+  }
+
+  private tryGenerateFakerValue(column: ColumnMetadata): string | null {
+    if (!this.fakerConfigService.isEnabled()) {
+      return null;
+    }
+
+    const matchResult = this.fieldPatternMatcher.match(column.name);
+    if (!matchResult.matched || !matchResult.pattern) {
+      return null;
+    }
+
+    const locale = this.fakerConfigService.getLocale();
+    const faker = this.getFaker(locale);
+    return this.generateValueByFakerMethod(faker, matchResult.pattern.fakerMethod, locale);
+  }
+
+  private truncateToMaxLength(value: string, maxLength: number | null): string {
+    const effectiveMaxLength =
+      maxLength === null
+        ? FakeDataService.DEFAULT_STRING_LENGTH
+        : maxLength === -1
+          ? FakeDataService.DEFAULT_MAX_STRING_LENGTH
+          : maxLength;
+
+    return value.length > effectiveMaxLength ? value.substring(0, effectiveMaxLength) : value;
+  }
+
+  private static createFakerInstance(locale: FakerLocale): Faker {
+    const localeData = locale === 'zh_TW' ? [zh_TW, en, base] : [en, base];
+    return new Faker({ locale: localeData });
+  }
+
+  private generateValueByFakerMethod(faker: Faker, method: FakerMethodId, locale: FakerLocale): string {
+    switch (method) {
+      case 'person.firstName':
+        return faker.person.firstName();
+      case 'person.lastName':
+        return faker.person.lastName();
+      case 'person.fullName':
+        return faker.person.fullName();
+      case 'internet.email':
+        return faker.internet.email();
+      case 'phone.number':
+        return faker.phone.number();
+      case 'location.streetAddress':
+        return faker.location.streetAddress();
+      case 'location.city':
+        return faker.location.city();
+      case 'location.country':
+        return faker.location.country();
+      case 'company.name':
+        return faker.company.name();
+      case 'internet.url':
+        return faker.internet.url();
+      case 'internet.username':
+        // zh_TW 的 username 常產生英文/無意義字串；改用中文姓名更符合「使用者名稱」欄位期待
+        return locale === 'zh_TW' ? faker.person.fullName() : faker.internet.username();
+      case 'internet.password':
+        return faker.internet.password();
+      case 'lorem.paragraph':
+        return faker.lorem.paragraph();
+    }
   }
 
   /**

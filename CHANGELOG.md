@@ -6,6 +6,15 @@ Check [Keep a Changelog](http://keepachangelog.com/) for recommendations on how 
 
 ## [Unreleased]
 
+## [0.1.1] - 2025-12-25
+
+### Added
+
+- **Faker.js 智慧假資料**：依欄位名稱語意（Email、FirstName、Phone、Address…）產生更真實的字串資料
+- 新增 VS Code 設定
+  - `sqlDataSeeder.faker.enabled`（預設：true）
+  - `sqlDataSeeder.faker.locale`（en | zh_TW，預設：en）
+
 ## [0.1.0] - 2025-12-25
 
 ### Added
