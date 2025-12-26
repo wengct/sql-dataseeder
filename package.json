@@ -8,12 +8,14 @@
     "url": "https://github.com/wengct/sql-dataseeder"
   },
   "description": "快速針對指定資料表產生 INSERT 語法。",
-  "version": "0.2.0",
+  "version": "0.2.1",
   "engines": {
     "vscode": "^1.106.1"
   },
   "categories": [
-    "Other"
+    "Other",
+    "Testing",
+    "Databases"
   ],
   "activationEvents": [
     "onCommand:sql-dataseeder.generateInsertScripts",
