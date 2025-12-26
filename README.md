@@ -15,6 +15,7 @@
 - 🎯 **一鍵產生**: 右鍵選單直接呼叫，無需複雜設定
 - 📋 **自動複製**: 產生的 INSERT 語法自動複製到剪貼簿
 - 🧠 **智慧假資料 (Faker.js)**: 依欄位名稱語意產生更真實的字串資料（Email、姓名、電話、地址等）
+- 🧩 **自定義固定值**: 依欄位名稱規則直接覆寫輸出值（優先於 Faker/預設產生）
 - ⚡ **高效能**: 100 筆 INSERT 語法在 2 秒內完成
 
 ## 先決條件
@@ -71,7 +72,27 @@ INSERT INTO [dbo].[Users] ([Name], [Email], [Age], [CreatedAt]) VALUES ('Alex Wa
 此功能預設啟用，僅影響字串類型（varchar/nvarchar）。若欄位名稱無法識別，會自動退回原本的隨機英數字串。
 
 - `sqlDataSeeder.faker.enabled`: 是否啟用（預設 true）
-- `sqlDataSeeder.faker.locale`: `en` 或 `zh_TW`（預設 en）
+- `sqlDataSeeder.faker.locale`: `en` 或 `zh-TW`（預設 en）
+
+## 自定義固定值（Custom Keyword Values）
+
+你可以用設定 `sqlDataSeeder.customKeywordValues.rules` 來指定「欄位名稱匹配規則 → 固定值」，命中後會直接覆寫產生結果，且優先於 Faker。
+
+```jsonc
+{
+  "sqlDataSeeder.customKeywordValues.rules": [
+    { "pattern": "tenantid", "matchType": "literal", "value": 1 },
+    { "pattern": "^is_", "matchType": "regex", "value": 0 },
+    { "pattern": "createdat", "matchType": "literal", "value": null },
+    { "pattern": "status", "matchType": "literal", "value": "ACTIVE" }
+  ]
+}
+```
+
+- `matchType: "literal"`：不分大小寫 contains（column name contains pattern）
+- `matchType: "regex"`：不分大小寫（等同 `/i`）
+- 多筆同時命中：以 rules 順序為準（first match wins）
+- 無效規則/無效 regex 會被忽略並在 Output Channel（SQL DataSeeder）輸出 warnings
 
 ## 常見問題
 
@@ -88,29 +109,6 @@ INSERT INTO [dbo].[Users] ([Name], [Email], [Age], [CreatedAt]) VALUES ('Alex Wa
 ### 某些欄位沒有出現？
 
 該欄位可能是 IDENTITY、COMPUTED 或不支援的資料類型。成功通知中會說明哪些欄位被跳過。
-
-## Release Notes
-
-### 0.1.1
-
-- 新增 Faker.js 智慧假資料：依欄位名稱語意產生更真實的字串資料
-- 新增設定：`sqlDataSeeder.faker.enabled`、`sqlDataSeeder.faker.locale`
-
-### 0.1.0
-
-- 新增「Generate Existing Insert Scripts」功能
-  - 從資料表現有資料產生 INSERT 語法
-  - 支援 WHERE 條件篩選與 ORDER BY 排序
-  - 支援 IDENTITY 欄位選項
-- 新增 binary/varbinary 資料類型支援
-- 支援 20 種 SQL Server 資料類型
-
-### 0.0.1
-
-- 初始版本
-- Generate Insert Scripts：產生假資料 INSERT 語法
-- 右鍵選單整合
-- 自動複製到剪貼簿
 
 ---
 

@@ -6,6 +6,13 @@ Check [Keep a Changelog](http://keepachangelog.com/) for recommendations on how 
 
 ## [Unreleased]
 
+## [0.2.0] - 2025-12-26
+
+### Added
+
+- **自定義關鍵字固定值（Custom Keyword Values）**：可用 `sqlDataSeeder.customKeywordValues.rules` 依欄位名稱匹配（literal contains / regex i）直接覆寫輸出值（最高優先於 Faker/預設產生）
+- 無效規則/無效 regex 會被忽略並輸出 warnings 到 Output Channel（SQL DataSeeder）
+
 ## [0.1.1] - 2025-12-25
 
 ### Added

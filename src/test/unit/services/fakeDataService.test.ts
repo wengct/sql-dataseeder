@@ -91,6 +91,95 @@ suite('FakeDataService', () => {
   });
 
   suite('Faker integration', () => {
+    test('should override faker value when custom keyword value matches', () => {
+      const stubFaker = {
+        internet: {
+          email: () => 'john@example.com',
+          url: () => 'https://example.com',
+          username: () => 'john_doe',
+          password: () => 'p@ssw0rd'
+        },
+        person: {
+          firstName: () => 'John',
+          lastName: () => 'Doe',
+          fullName: () => 'John Doe'
+        },
+        phone: { number: () => '555-1234' },
+        location: {
+          streetAddress: () => '123 Main St',
+          city: () => 'Taipei',
+          country: () => 'Taiwan'
+        },
+        company: { name: () => 'Acme Corp' },
+        lorem: { paragraph: () => 'Lorem ipsum' }
+      } as any;
+
+      const matcher = new FieldPatternMatcher();
+      const config = { isEnabled: () => true, getLocale: () => 'en' as const };
+      const fakerFactory = () => stubFaker;
+      const customKeywordValuesConfigService = {
+        getConfig: () => ({
+          rules: [{ pattern: 'email', matchType: 'literal', value: 'FIXED' }],
+          warnings: []
+        })
+      };
+
+      const fakerService = new FakeDataService(
+        matcher,
+        config as any,
+        fakerFactory as any,
+        customKeywordValuesConfigService as any
+      );
+
+      const column = createColumn(SqlDataType.VARCHAR, { name: 'Email', maxLength: 100 });
+      const value = fakerService.generateValue(column);
+
+      assert.strictEqual(value, "'FIXED'");
+    });
+
+    test('should not change existing behavior when rules are empty', () => {
+      const stubFaker = {
+        internet: {
+          email: () => 'john@example.com',
+          url: () => 'https://example.com',
+          username: () => 'john_doe',
+          password: () => 'p@ssw0rd'
+        },
+        person: {
+          firstName: () => 'John',
+          lastName: () => 'Doe',
+          fullName: () => 'John Doe'
+        },
+        phone: { number: () => '555-1234' },
+        location: {
+          streetAddress: () => '123 Main St',
+          city: () => 'Taipei',
+          country: () => 'Taiwan'
+        },
+        company: { name: () => 'Acme Corp' },
+        lorem: { paragraph: () => 'Lorem ipsum' }
+      } as any;
+
+      const matcher = new FieldPatternMatcher();
+      const config = { isEnabled: () => true, getLocale: () => 'en' as const };
+      const fakerFactory = () => stubFaker;
+      const customKeywordValuesConfigService = {
+        getConfig: () => ({ rules: [], warnings: [] })
+      };
+
+      const fakerService = new FakeDataService(
+        matcher,
+        config as any,
+        fakerFactory as any,
+        customKeywordValuesConfigService as any
+      );
+
+      const column = createColumn(SqlDataType.VARCHAR, { name: 'Email', maxLength: 100 });
+      const value = fakerService.generateValue(column);
+
+      assert.strictEqual(value, "'john@example.com'");
+    });
+
     test('should use faker value when enabled and column name matches', () => {
       const stubFaker = {
         internet: {
@@ -157,6 +246,28 @@ suite('FakeDataService', () => {
       const value = fakerService.generateValue(column);
 
       assert.ok(!value.includes('@'), 'Fallback random string should not include @');
+    });
+
+    test('should not throw when invalid rules exist', () => {
+      const matcher = new FieldPatternMatcher();
+      const config = { isEnabled: () => false, getLocale: () => 'en' as const };
+      const customKeywordValuesConfigService = {
+        getConfig: () => ({
+          rules: [{ pattern: '[', matchType: 'regex', value: 1 }],
+          warnings: []
+        })
+      };
+
+      const serviceWithInvalidRules = new FakeDataService(
+        matcher,
+        config as any,
+        (() => ({}) as any) as any,
+        customKeywordValuesConfigService as any
+      );
+
+      const column = createColumn(SqlDataType.INT, { name: 'Is_Active' });
+      const value = serviceWithInvalidRules.generateValue(column);
+      assert.ok(typeof value === 'string' && value.length > 0);
     });
 
     test('should request faker instance using configured locale', () => {

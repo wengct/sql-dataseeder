@@ -2,7 +2,9 @@ import { Faker, base, en, zh_TW } from '@faker-js/faker';
 import { ColumnMetadata } from '../models/columnMetadata';
 import { FakerLocale, FakerMethodId } from '../models/fieldPattern';
 import { SqlDataType, SUPPORTED_DATA_TYPES, parseSqlDataType } from '../models/sqlDataType';
-import { escapeSqlString } from '../utils/sqlEscape';
+import { escapeSqlString, formatCustomKeywordValueForSql } from '../utils/sqlEscape';
+import { CustomKeywordValuesConfigService } from './customKeywordValuesConfigService';
+import { CustomKeywordValueRuleMatcher } from './customKeywordValueRuleMatcher';
 import { FakerConfigService } from './fakerConfigService';
 import { FieldPatternMatcher } from './fieldPatternMatcher';
 
@@ -22,16 +24,22 @@ export class FakeDataService {
 
   private readonly fieldPatternMatcher: Pick<FieldPatternMatcher, 'match'>;
   private readonly fakerConfigService: Pick<FakerConfigService, 'isEnabled' | 'getLocale'>;
+  private readonly customKeywordValuesConfigService: Pick<CustomKeywordValuesConfigService, 'getConfig'>;
+  private readonly customKeywordValueRuleMatcher: Pick<CustomKeywordValueRuleMatcher, 'match'>;
   private readonly fakerFactory: (locale: FakerLocale) => Faker;
   private readonly fakerCache = new Map<FakerLocale, Faker>();
 
   constructor(
     fieldPatternMatcher: Pick<FieldPatternMatcher, 'match'> = new FieldPatternMatcher(),
     fakerConfigService: Pick<FakerConfigService, 'isEnabled' | 'getLocale'> = new FakerConfigService(),
-    fakerFactory: (locale: FakerLocale) => Faker = FakeDataService.createFakerInstance
+    fakerFactory: (locale: FakerLocale) => Faker = FakeDataService.createFakerInstance,
+    customKeywordValuesConfigService: Pick<CustomKeywordValuesConfigService, 'getConfig'> = new CustomKeywordValuesConfigService(),
+    customKeywordValueRuleMatcher: Pick<CustomKeywordValueRuleMatcher, 'match'> = new CustomKeywordValueRuleMatcher()
   ) {
     this.fieldPatternMatcher = fieldPatternMatcher;
     this.fakerConfigService = fakerConfigService;
+    this.customKeywordValuesConfigService = customKeywordValuesConfigService;
+    this.customKeywordValueRuleMatcher = customKeywordValueRuleMatcher;
     this.fakerFactory = fakerFactory;
   }
 
@@ -41,6 +49,12 @@ export class FakeDataService {
    * @returns 假資料值（已格式化為 SQL 語法）
    */
   generateValue(column: ColumnMetadata): string {
+    const customRules = this.customKeywordValuesConfigService.getConfig().rules;
+    const customMatch = this.customKeywordValueRuleMatcher.match(column.name, customRules);
+    if (customMatch) {
+      return formatCustomKeywordValueForSql(customMatch.value, column);
+    }
+
     switch (column.dataType) {
       // 字串類型
       case SqlDataType.VARCHAR:

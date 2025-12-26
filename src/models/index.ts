@@ -27,3 +27,13 @@ export {
   DEFAULT_FAKER_CONFIG,
   DEFAULT_FIELD_PATTERNS
 } from './fieldPattern';
+
+export {
+  CustomKeywordValue,
+  CustomKeywordValueMatchType,
+  CustomKeywordValueRule,
+  validateCustomKeywordValueRule
+} from './customKeywordValueRule';
+
+export { CustomKeywordValuesConfig } from './customKeywordValuesConfig';
+

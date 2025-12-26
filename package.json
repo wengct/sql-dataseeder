@@ -8,7 +8,7 @@
     "url": "https://github.com/wengct/sql-dataseeder"
   },
   "description": "快速針對指定資料表產生 INSERT 語法。",
-  "version": "0.1.1",
+  "version": "0.2.0",
   "engines": {
     "vscode": "^1.106.1"
   },
@@ -64,6 +64,35 @@
           ],
           "default": "en",
           "description": "Locale for Faker.js generated data"
+        },
+        "sqlDataSeeder.customKeywordValues.rules": {
+          "type": "array",
+          "default": [],
+          "description": "Override generated column values when column name matches a rule (highest priority).",
+          "items": {
+            "type": "object",
+            "required": ["pattern", "matchType", "value"],
+            "additionalProperties": false,
+            "properties": {
+              "pattern": {
+                "type": "string",
+                "description": "Column name match pattern"
+              },
+              "matchType": {
+                "type": "string",
+                "enum": ["literal", "regex"],
+                "description": "How to match: literal contains (case-insensitive) or regex (case-insensitive)"
+              },
+              "value": {
+                "description": "Fixed literal value to output (null/number/string). Raw SQL expressions are not supported.",
+                "oneOf": [
+                  { "type": "null" },
+                  { "type": "number" },
+                  { "type": "string" }
+                ]
+              }
+            }
+          }
         }
       }
     }
