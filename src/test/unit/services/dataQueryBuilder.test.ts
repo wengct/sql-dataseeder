@@ -3,7 +3,7 @@ import { DataQueryBuilder } from '../../../services/dataQueryBuilder';
 import { TableMetadata } from '../../../models/tableMetadata';
 import { IExistingDataOptions } from '../../../models/existingDataTypes';
 
-describe('DataQueryBuilder', () => {
+suite('DataQueryBuilder', () => {
   const baseOptions: IExistingDataOptions = {
     rowCount: 5,
     whereClause: null,

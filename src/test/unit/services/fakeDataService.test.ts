@@ -1,7 +1,8 @@
 import * as assert from 'assert';
-import { SqlDataType } from '../../../models/sqlDataType';
 import { ColumnMetadata } from '../../../models/columnMetadata';
+import { SqlDataType } from '../../../models/sqlDataType';
 import { FakeDataService } from '../../../services/fakeDataService';
+import { FieldPatternMatcher } from '../../../services/fieldPatternMatcher';
 
 suite('FakeDataService', () => {
   let service: FakeDataService;
@@ -14,14 +15,14 @@ suite('FakeDataService', () => {
     dataType: SqlDataType,
     options: Partial<ColumnMetadata> = {}
   ): ColumnMetadata => ({
-    name: 'TestColumn',
+    name: options.name ?? 'TestColumn',
     dataType,
     maxLength: options.maxLength ?? null,
     precision: options.precision ?? null,
     scale: options.scale ?? null,
     isNullable: options.isNullable ?? false,
-    isIdentity: false,
-    isComputed: false
+    isIdentity: options.isIdentity ?? false,
+    isComputed: options.isComputed ?? false
   });
 
   suite('String types', () => {
@@ -86,6 +87,101 @@ suite('FakeDataService', () => {
       // Default max length for varchar(max) should be reasonable (e.g., 100)
       assert.ok(innerValue.length <= 100, 'varchar(max) should use default max length');
       assert.ok(innerValue.length > 0, 'Should not be empty');
+    });
+  });
+
+  suite('Faker integration', () => {
+    test('should use faker value when enabled and column name matches', () => {
+      const stubFaker = {
+        internet: {
+          email: () => 'john@example.com',
+          url: () => 'https://example.com',
+          username: () => 'john_doe',
+          password: () => 'p@ssw0rd'
+        },
+        person: {
+          firstName: () => 'John',
+          lastName: () => 'Doe',
+          fullName: () => 'John Doe'
+        },
+        phone: { number: () => '555-1234' },
+        location: {
+          streetAddress: () => '123 Main St',
+          city: () => 'Taipei',
+          country: () => 'Taiwan'
+        },
+        company: { name: () => 'Acme Corp' },
+        lorem: { paragraph: () => 'Lorem ipsum' }
+      } as any;
+
+      const matcher = new FieldPatternMatcher();
+      const config = { isEnabled: () => true, getLocale: () => 'en' as const };
+      const fakerFactory = () => stubFaker;
+      const fakerService = new FakeDataService(matcher, config as any, fakerFactory as any);
+
+      const column = createColumn(SqlDataType.VARCHAR, { name: 'Email', maxLength: 100 });
+      const value = fakerService.generateValue(column);
+
+      assert.strictEqual(value, "'john@example.com'");
+    });
+
+    test('should truncate faker value to maxLength', () => {
+      const stubFaker = {
+        internet: { email: () => 'averylongemail@example.com' },
+        person: { firstName: () => 'John', lastName: () => 'Doe', fullName: () => 'John Doe' },
+        phone: { number: () => '555-1234' },
+        location: { streetAddress: () => '123 Main St', city: () => 'Taipei', country: () => 'Taiwan' },
+        company: { name: () => 'Acme Corp' },
+        lorem: { paragraph: () => 'Lorem ipsum' }
+      } as any;
+
+      const matcher = new FieldPatternMatcher();
+      const config = { isEnabled: () => true, getLocale: () => 'en' as const };
+      const fakerService = new FakeDataService(matcher, config as any, (() => stubFaker) as any);
+
+      const column = createColumn(SqlDataType.VARCHAR, { name: 'Email', maxLength: 5 });
+      const value = fakerService.generateValue(column);
+
+      assert.strictEqual(value, "'avery'");
+    });
+
+    test('should skip faker generation when disabled', () => {
+      const matcher = new FieldPatternMatcher();
+      const config = { isEnabled: () => false, getLocale: () => 'en' as const };
+      const fakerFactory = () => {
+        throw new Error('fakerFactory should not be called when disabled');
+      };
+      const fakerService = new FakeDataService(matcher, config as any, fakerFactory as any);
+
+      const column = createColumn(SqlDataType.VARCHAR, { name: 'Email', maxLength: 100 });
+      const value = fakerService.generateValue(column);
+
+      assert.ok(!value.includes('@'), 'Fallback random string should not include @');
+    });
+
+    test('should request faker instance using configured locale', () => {
+      const matcher = new FieldPatternMatcher();
+      const config = { isEnabled: () => true, getLocale: () => 'zh_TW' as const };
+      let requestedLocale: string | null = null;
+
+      const stubFaker = {
+        internet: { email: () => 'john@example.com' },
+        person: { firstName: () => 'John', lastName: () => 'Doe', fullName: () => 'John Doe' },
+        phone: { number: () => '555-1234' },
+        location: { streetAddress: () => '123 Main St', city: () => 'Taipei', country: () => 'Taiwan' },
+        company: { name: () => 'Acme Corp' },
+        lorem: { paragraph: () => 'Lorem ipsum' }
+      } as any;
+
+      const fakerFactory = (locale: string) => {
+        requestedLocale = locale;
+        return stubFaker;
+      };
+
+      const fakerService = new FakeDataService(matcher, config as any, fakerFactory as any);
+      fakerService.generateValue(createColumn(SqlDataType.VARCHAR, { name: 'Email', maxLength: 100 }));
+
+      assert.strictEqual(requestedLocale, 'zh_TW');
     });
   });
 
