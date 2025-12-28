@@ -3,6 +3,7 @@ import {
   FieldMatchResult,
   FieldPattern
 } from '../models/fieldPattern';
+import { normalizeColumnName } from '../utils/columnNameNormalizer';
 
 export class FieldPatternMatcher {
   private readonly patterns: readonly FieldPattern[];
@@ -12,8 +13,9 @@ export class FieldPatternMatcher {
   }
 
   match(columnName: string): FieldMatchResult {
+    const normalizedColumnName = normalizeColumnName(columnName);
     for (const pattern of this.patterns) {
-      if (pattern.regex.test(columnName)) {
+      if (pattern.regex.test(normalizedColumnName)) {
         return { matched: true, pattern, columnName };
       }
     }
@@ -25,3 +27,4 @@ export class FieldPatternMatcher {
     return this.patterns;
   }
 }
+

@@ -37,3 +37,10 @@ export {
 
 export { CustomKeywordValuesConfig } from './customKeywordValuesConfig';
 
+export {
+  ColumnNameSynonymGroup,
+  ColumnNameSynonymsConfig,
+  validateColumnNameSynonymGroup
+} from './columnNameSynonyms';
+
+

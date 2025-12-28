@@ -36,4 +36,61 @@ suite('CustomKeywordValueRuleMatcher', () => {
     assert.ok(match);
     assert.strictEqual(match?.value, 0);
   });
+
+  test('should match Chinese literal patterns', () => {
+    const matcher = new CustomKeywordValueRuleMatcher();
+    const rules: CustomKeywordValueRule[] = [
+      { pattern: '證號', matchType: 'literal', value: 'ID' }
+    ];
+
+    const match = matcher.match('證號', rules);
+    assert.ok(match);
+    assert.strictEqual(match?.value, 'ID');
+  });
+
+  test('should match synonyms before literal contains', () => {
+    const matcher = new CustomKeywordValueRuleMatcher();
+    const rules: CustomKeywordValueRule[] = [
+      { pattern: '身分證字號', matchType: 'literal', value: 'ID' }
+    ];
+    const synonyms = [['身分證字號', '證號']];
+
+    const match = matcher.match('證號', rules, synonyms);
+    assert.ok(match);
+    assert.strictEqual(match?.value, 'ID');
+  });
+
+  test('should not match when not in synonym groups', () => {
+    const matcher = new CustomKeywordValueRuleMatcher();
+    const rules: CustomKeywordValueRule[] = [
+      { pattern: '身分證字號', matchType: 'literal', value: 'ID' }
+    ];
+    const synonyms = [['身分證字號', '證號']];
+
+    const match = matcher.match('護照號碼', rules, synonyms);
+    assert.strictEqual(match, null);
+  });
+
+  test('should keep English literal contains behavior', () => {
+    const matcher = new CustomKeywordValueRuleMatcher();
+    const rules: CustomKeywordValueRule[] = [
+      { pattern: 'status', matchType: 'literal', value: 'ACTIVE' }
+    ];
+
+    const match = matcher.match('OrderStatus', rules);
+    assert.ok(match);
+    assert.strictEqual(match?.value, 'ACTIVE');
+  });
+
+  test('should keep English regex behavior', () => {
+    const matcher = new CustomKeywordValueRuleMatcher();
+    const rules: CustomKeywordValueRule[] = [
+      { pattern: 'Id$', matchType: 'regex', value: 99 }
+    ];
+
+    const match = matcher.match('TenantId', rules);
+    assert.ok(match);
+    assert.strictEqual(match?.value, 99);
+  });
 });
+

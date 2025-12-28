@@ -1,0 +1,78 @@
+openapi: 3.0.3
+info:
+  title: Column Matching Contract (Internal)
+  version: 1.0.0
+  description: |
+    內部匹配流程的合約描述，用於規劃中文與同義詞匹配。
+servers:
+  - url: http://localhost
+paths:
+  /column-matching/resolve:
+    post:
+      summary: Resolve column name against rules and synonyms
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/MatchRequest'
+      responses:
+        '200':
+          description: Match result
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MatchResponse'
+components:
+  schemas:
+    RulePattern:
+      type: object
+      required: [pattern, matchType, value]
+      additionalProperties: false
+      properties:
+        pattern:
+          type: string
+        matchType:
+          type: string
+          enum: [literal, regex]
+        value:
+          oneOf:
+            - type: string
+            - type: number
+            - type: 'null'
+    MatchRequest:
+      type: object
+      required: [columnName, rules]
+      additionalProperties: false
+      properties:
+        columnName:
+          type: string
+        rules:
+          type: array
+          items:
+            $ref: '#/components/schemas/RulePattern'
+        synonyms:
+          type: array
+          items:
+            type: array
+            items:
+              type: string
+    MatchResponse:
+      type: object
+      required: [matched, matchedBy]
+      additionalProperties: false
+      properties:
+        matched:
+          type: boolean
+        matchedBy:
+          type: string
+          enum: [synonym, literal, regex, semantic, none]
+        matchedPattern:
+          type: string
+          nullable: true
+        matchedValue:
+          nullable: true
+          oneOf:
+            - type: string
+            - type: number
+            - type: 'null'

@@ -6,6 +6,14 @@ Check [Keep a Changelog](http://keepachangelog.com/) for recommendations on how 
 
 ## [Unreleased]
 
+## [0.3.0] - 2025-12-27
+
+### Added
+
+- 中文/混合欄位名稱支援 NFKC 正規化與英文大小寫不敏感匹配
+- 新增欄位名稱同義詞設定 `sqlDataSeeder.columnNameSynonyms`，同義詞命中優先於語意匹配
+- 同義詞設定格式錯誤時輸出 warning 並跳過同義詞流程
+
 ## [0.2.0] - 2025-12-26
 
 ### Added
@@ -42,3 +50,4 @@ Check [Keep a Changelog](http://keepachangelog.com/) for recommendations on how 
 - 支援 18 種 SQL Server 資料類型
 - 右鍵選單整合
 - 自動複製到剪貼簿
+
