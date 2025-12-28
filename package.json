@@ -8,7 +8,7 @@
     "url": "https://github.com/wengct/sql-dataseeder"
   },
   "description": "快速針對指定資料表產生 INSERT 語法。",
-  "version": "0.2.1",
+  "version": "0.3.0",
   "engines": {
     "vscode": "^1.106.1"
   },
@@ -95,6 +95,18 @@
               }
             }
           }
+        },
+        "sqlDataSeeder.columnNameSynonyms": {
+          "type": "array",
+          "default": [],
+          "description": "Column name synonyms groups used for matching literal rules (synonym hits override semantic matching).",
+          "items": {
+            "type": "array",
+            "minItems": 2,
+            "items": {
+              "type": "string"
+            }
+          }
         }
       }
     }
@@ -127,3 +139,4 @@
     "@faker-js/faker": "^9.9.0"
   }
 }
+

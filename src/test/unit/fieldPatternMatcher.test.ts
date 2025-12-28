@@ -25,4 +25,21 @@ suite('FieldPatternMatcher', () => {
     assert.strictEqual(result.matched, false);
     assert.strictEqual(result.pattern, undefined);
   });
+
+  test('should match mixed language column names', () => {
+    const matcher = new FieldPatternMatcher();
+    const result = matcher.match('使用者Email');
+
+    assert.ok(result.matched);
+    assert.strictEqual(result.pattern?.id, 'email');
+  });
+
+  test('should keep English semantic matches unchanged', () => {
+    const matcher = new FieldPatternMatcher();
+    const result = matcher.match('UserPassword');
+
+    assert.ok(result.matched);
+    assert.strictEqual(result.pattern?.id, 'password');
+  });
 });
+

@@ -9,13 +9,13 @@
 - **Generate Insert Scripts**: 產生含有假資料的 INSERT 語法
 - **Generate Existing Insert Scripts**: 從資料表現有資料產生可執行的 INSERT 語法
 
-
 ### 主要特點
 
 - 🎯 **一鍵產生**: 右鍵選單直接呼叫，無需複雜設定
 - 📋 **自動複製**: 產生的 INSERT 語法自動複製到剪貼簿
-- 🧠 **智慧假資料 (Faker.js)**: 依欄位名稱語意產生更真實的字串資料（Email、姓名、電話、地址等）
+- 🧠 **智慧假資料 ([Faker.js](https://fakerjs.dev/))**: 依欄位名稱語意產生更真實的字串資料（Email、姓名、電話、地址等）
 - 🧩 **自定義固定值**: 依欄位名稱規則直接覆寫輸出值（優先於 Faker/預設產生）
+- 🌏 **中文/同義詞匹配**: 中文或混合欄位名稱可命中規則，並支援使用者自訂同義詞群組
 - ⚡ **高效能**: 100 筆 INSERT 語法在 2 秒內完成
 
 ## 先決條件
@@ -48,18 +48,18 @@ INSERT INTO [dbo].[Users] ([Name], [Email], [Age], [CreatedAt]) VALUES ('Alex Wa
 
 ## 支援的資料類型
 
-| 類型 | 產生的值範例 | 說明 |
-|------|-------------|------|
-| varchar, nvarchar, char, nchar | `'xK9pLm'`、`N'中文'` | Unicode 類型自動加 N 前綴 |
-| int, bigint, smallint, tinyint | `12345` | 整數類型 |
-| decimal, numeric | `123.45` | 精確數值類型 |
-| float, real | `123.4567` | 浮點數類型 |
-| datetime, datetime2 | `'2025-01-15 10:30:00.123'` | 日期時間類型 |
-| date | `'2025-01-15'` | 僅日期 |
-| time | `'10:30:00'` | 僅時間 |
-| bit | `0` 或 `1` | 布林類型 |
-| uniqueidentifier | `'a1b2c3d4-e5f6-4890-abcd-ef1234567890'` | GUID |
-| binary, varbinary | `0x48656C6C6F` | 二進位資料（十六進位格式） |
+| 類型                           | 產生的值範例                             | 說明                       |
+| ------------------------------ | ---------------------------------------- | -------------------------- |
+| varchar, nvarchar, char, nchar | `'xK9pLm'`、`N'中文'`                    | Unicode 類型自動加 N 前綴  |
+| int, bigint, smallint, tinyint | `12345`                                  | 整數類型                   |
+| decimal, numeric               | `123.45`                                 | 精確數值類型               |
+| float, real                    | `123.4567`                               | 浮點數類型                 |
+| datetime, datetime2            | `'2025-01-15 10:30:00.123'`              | 日期時間類型               |
+| date                           | `'2025-01-15'`                           | 僅日期                     |
+| time                           | `'10:30:00'`                             | 僅時間                     |
+| bit                            | `0` 或 `1`                               | 布林類型                   |
+| uniqueidentifier               | `'a1b2c3d4-e5f6-4890-abcd-ef1234567890'` | GUID                       |
+| binary, varbinary              | `0x48656C6C6F`                           | 二進位資料（十六進位格式） |
 
 ## 自動排除的欄位
 
@@ -94,11 +94,28 @@ INSERT INTO [dbo].[Users] ([Name], [Email], [Age], [CreatedAt]) VALUES ('Alex Wa
 - 多筆同時命中：以 rules 順序為準（first match wins）
 - 無效規則/無效 regex 會被忽略並在 Output Channel（SQL DataSeeder）輸出 warnings
 
-## 常見問題
+## 欄位名稱同義詞（Column Name Synonyms）
+
+你可以設定 `sqlDataSeeder.columnNameSynonyms` 讓「同義詞」視為同一欄位名稱，提升規則命中率。
+
+```jsonc
+{
+  "sqlDataSeeder.columnNameSynonyms": [
+    ["身分證字號", "證號"],
+    ["手機", "行動電話"]
+  ]
+}
+```
+
+- 每個群組至少 2 個非空字串，格式錯誤會**整體跳過同義詞匹配**
+- 同義詞匹配採 **完整欄位名稱等值**（不做模糊/部分匹配）
+- 同義詞命中會優先於語意/模式匹配流程
+- 欄位名稱會先做 [NFKC 正規化](https://zh.wikipedia.org/wiki/Unicode%E7%AD%89%E5%83%B9%E6%80%A7) + 英文小寫統一後再比對## 常見問題
 
 ### 看不到「Generate Insert Scripts」選項？
 
 請確認：
+
 - 已安裝 mssql 擴充套件
 - 正在「Table」節點上點擊右鍵（不是資料夾或欄位）
 

@@ -3,6 +3,7 @@ import { ColumnMetadata } from '../models/columnMetadata';
 import { FakerLocale, FakerMethodId } from '../models/fieldPattern';
 import { SqlDataType, SUPPORTED_DATA_TYPES, parseSqlDataType } from '../models/sqlDataType';
 import { escapeSqlString, formatCustomKeywordValueForSql } from '../utils/sqlEscape';
+import { ColumnNameSynonymsConfigService } from './columnNameSynonymsConfigService';
 import { CustomKeywordValuesConfigService } from './customKeywordValuesConfigService';
 import { CustomKeywordValueRuleMatcher } from './customKeywordValueRuleMatcher';
 import { FakerConfigService } from './fakerConfigService';
@@ -26,6 +27,7 @@ export class FakeDataService {
   private readonly fakerConfigService: Pick<FakerConfigService, 'isEnabled' | 'getLocale'>;
   private readonly customKeywordValuesConfigService: Pick<CustomKeywordValuesConfigService, 'getConfig'>;
   private readonly customKeywordValueRuleMatcher: Pick<CustomKeywordValueRuleMatcher, 'match'>;
+  private readonly columnNameSynonymsConfigService: Pick<ColumnNameSynonymsConfigService, 'getConfig'>;
   private readonly fakerFactory: (locale: FakerLocale) => Faker;
   private readonly fakerCache = new Map<FakerLocale, Faker>();
 
@@ -34,12 +36,14 @@ export class FakeDataService {
     fakerConfigService: Pick<FakerConfigService, 'isEnabled' | 'getLocale'> = new FakerConfigService(),
     fakerFactory: (locale: FakerLocale) => Faker = FakeDataService.createFakerInstance,
     customKeywordValuesConfigService: Pick<CustomKeywordValuesConfigService, 'getConfig'> = new CustomKeywordValuesConfigService(),
-    customKeywordValueRuleMatcher: Pick<CustomKeywordValueRuleMatcher, 'match'> = new CustomKeywordValueRuleMatcher()
+    customKeywordValueRuleMatcher: Pick<CustomKeywordValueRuleMatcher, 'match'> = new CustomKeywordValueRuleMatcher(),
+    columnNameSynonymsConfigService: Pick<ColumnNameSynonymsConfigService, 'getConfig'> = new ColumnNameSynonymsConfigService()
   ) {
     this.fieldPatternMatcher = fieldPatternMatcher;
     this.fakerConfigService = fakerConfigService;
     this.customKeywordValuesConfigService = customKeywordValuesConfigService;
     this.customKeywordValueRuleMatcher = customKeywordValueRuleMatcher;
+    this.columnNameSynonymsConfigService = columnNameSynonymsConfigService;
     this.fakerFactory = fakerFactory;
   }
 
@@ -50,7 +54,8 @@ export class FakeDataService {
    */
   generateValue(column: ColumnMetadata): string {
     const customRules = this.customKeywordValuesConfigService.getConfig().rules;
-    const customMatch = this.customKeywordValueRuleMatcher.match(column.name, customRules);
+    const synonymGroups = this.columnNameSynonymsConfigService.getConfig().groups;
+    const customMatch = this.customKeywordValueRuleMatcher.match(column.name, customRules, synonymGroups);
     if (customMatch) {
       return formatCustomKeywordValueForSql(customMatch.value, column);
     }
@@ -400,3 +405,4 @@ export class FakeDataService {
     });
   }
 }
+
