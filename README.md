@@ -1,3 +1,5 @@
+[![Installs](https://img.shields.io/visual-studio-marketplace/i/weng-ct.sql-dataseeder.svg?label=Installs)](https://marketplace.visualstudio.com/items?itemName=weng-ct.sql-dataseeder)
+
 # SQL DataSeeder
 
 快速針對 SQL Server 資料表產生 INSERT 語法的 VS Code 擴充套件。
