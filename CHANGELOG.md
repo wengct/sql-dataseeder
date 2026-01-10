@@ -8,6 +8,8 @@ Check [Keep a Changelog](http://keepachangelog.com/) for recommendations on how 
 
 ## [Unreleased]
 
+## [0.3.1] - 2026-01-10
+
 ### Changed
 
 - 產生的 INSERT / IDENTITY_INSERT 目標表名在可取得資料庫名稱時，改為使用三段式名稱 `[database].[schema].[table]`（取不到則維持 `[schema].[table]`）
