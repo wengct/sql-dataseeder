@@ -22,6 +22,7 @@ suite('ExistingDataInsertGenerator', () => {
   });
 
   const createTable = (columns: ColumnMetadata[]): TableMetadata => ({
+    databaseName: 'MyDb',
     schemaName: 'dbo',
     tableName: 'Users',
     columns,
@@ -80,7 +81,7 @@ suite('ExistingDataInsertGenerator', () => {
     assert.strictEqual(result.rowCount, 2);
 
     // IDENTITY excluded by default
-    assert.ok(result.script?.includes('INSERT INTO [dbo].[Users] ([Name], [Note], [Data]) VALUES'));
+    assert.ok(result.script?.includes('INSERT INTO [MyDb].[dbo].[Users] ([Name], [Note], [Data]) VALUES'));
     assert.ok(result.script?.includes("('O''Brien', N'中文', 0xAB);"));
     assert.ok(result.script?.includes("('Alice', N'Hello', 0xABCD);"));
   });
@@ -112,9 +113,9 @@ suite('ExistingDataInsertGenerator', () => {
 
     assert.strictEqual(result.success, true);
     assert.strictEqual(result.hasIdentityInsert, true);
-    assert.ok(result.script?.startsWith('SET IDENTITY_INSERT [dbo].[Users] ON;'));
-    assert.ok(result.script?.includes('INSERT INTO [dbo].[Users] ([Id], [Name]) VALUES (1, \'Alice\');'));
-    assert.ok(result.script?.trimEnd().endsWith('SET IDENTITY_INSERT [dbo].[Users] OFF;'));
+    assert.ok(result.script?.startsWith('SET IDENTITY_INSERT [MyDb].[dbo].[Users] ON;'));
+    assert.ok(result.script?.includes('INSERT INTO [MyDb].[dbo].[Users] ([Id], [Name]) VALUES (1, \'Alice\');'));
+    assert.ok(result.script?.trimEnd().endsWith('SET IDENTITY_INSERT [MyDb].[dbo].[Users] OFF;'));
   });
 
   test('should return error when no insertable columns', () => {

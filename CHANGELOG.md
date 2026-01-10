@@ -1,10 +1,16 @@
 # Change Log
 
+<!-- markdownlint-disable MD024 -->
+
 All notable changes to the "sql-dataseeder" extension will be documented in this file.
 
 Check [Keep a Changelog](http://keepachangelog.com/) for recommendations on how to structure this file.
 
 ## [Unreleased]
+
+### Changed
+
+- 產生的 INSERT / IDENTITY_INSERT 目標表名在可取得資料庫名稱時，改為使用三段式名稱 `[database].[schema].[table]`（取不到則維持 `[schema].[table]`）
 
 ## [0.3.0] - 2025-12-27
 

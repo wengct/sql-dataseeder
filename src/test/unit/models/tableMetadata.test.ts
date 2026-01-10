@@ -31,6 +31,18 @@ suite('TableMetadata', () => {
       assert.strictEqual(getFullTableName(table), '[dbo].[Users]');
     });
 
+    test('should include database name when provided', () => {
+      const table: TableMetadata = {
+        databaseName: 'MyDb',
+        schemaName: 'dbo',
+        tableName: 'Users',
+        columns: [],
+        hasIdentityColumn: false
+      };
+
+      assert.strictEqual(getFullTableName(table), '[MyDb].[dbo].[Users]');
+    });
+
     test('should handle different schema names', () => {
       const table: TableMetadata = {
         schemaName: 'sales',

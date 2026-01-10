@@ -31,6 +31,7 @@ suite('InsertScriptGenerator', () => {
   });
 
   const createTable = (columns: ColumnMetadata[]): TableMetadata => ({
+    databaseName: 'MyDb',
     schemaName: 'dbo',
     tableName: 'TestTable',
     columns,
@@ -56,6 +57,7 @@ suite('InsertScriptGenerator', () => {
 
     test('should include table name with schema in INSERT statement', () => {
       const table: TableMetadata = {
+        databaseName: 'MyDb',
         schemaName: 'sales',
         tableName: 'Orders',
         columns: [createColumn('OrderId', SqlDataType.INT)],
@@ -65,7 +67,7 @@ suite('InsertScriptGenerator', () => {
 
       const result = generator.generate(table, options);
 
-      assert.ok(result.script?.includes('[sales].[Orders]'), 'Should include schema and table name');
+      assert.ok(result.script?.includes('[MyDb].[sales].[Orders]'), 'Should include database, schema and table name');
     });
 
     test('should include column names in INSERT statement', () => {

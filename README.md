@@ -41,10 +41,12 @@
 ## 範例輸出
 
 ```sql
-INSERT INTO [dbo].[Users] ([Name], [Email], [Age], [CreatedAt]) VALUES ('John Doe', N'john@example.com', 25, '2025-01-15 10:30:00.123');
-INSERT INTO [dbo].[Users] ([Name], [Email], [Age], [CreatedAt]) VALUES ('Jane Smith', N'jane.smith@example.com', 32, '2025-02-20 14:45:00.456');
-INSERT INTO [dbo].[Users] ([Name], [Email], [Age], [CreatedAt]) VALUES ('Alex Wang', N'alex.wang@example.com', 28, '2025-03-10 09:15:00.789');
+INSERT INTO [MyDatabase].[dbo].[Users] ([Name], [Email], [Age], [CreatedAt]) VALUES ('John Doe', N'john@example.com', 25, '2025-01-15 10:30:00.123');
+INSERT INTO [MyDatabase].[dbo].[Users] ([Name], [Email], [Age], [CreatedAt]) VALUES ('Jane Smith', N'jane.smith@example.com', 32, '2025-02-20 14:45:00.456');
+INSERT INTO [MyDatabase].[dbo].[Users] ([Name], [Email], [Age], [CreatedAt]) VALUES ('Alex Wang', N'alex.wang@example.com', 28, '2025-03-10 09:15:00.789');
 ```
+
+> 註：若能從 Object Explorer 節點/連線資訊取得資料庫名稱，產生的目標表名會使用三段式名稱 `[database].[schema].[table]`；若取得不到，則退回 `[schema].[table]`。
 
 ## 支援的資料類型
 
@@ -110,7 +112,9 @@ INSERT INTO [dbo].[Users] ([Name], [Email], [Age], [CreatedAt]) VALUES ('Alex Wa
 - 每個群組至少 2 個非空字串，格式錯誤會**整體跳過同義詞匹配**
 - 同義詞匹配採 **完整欄位名稱等值**（不做模糊/部分匹配）
 - 同義詞命中會優先於語意/模式匹配流程
-- 欄位名稱會先做 [NFKC 正規化](https://zh.wikipedia.org/wiki/Unicode%E7%AD%89%E5%83%B9%E6%80%A7) + 英文小寫統一後再比對## 常見問題
+- 欄位名稱會先做 [NFKC 正規化](https://zh.wikipedia.org/wiki/Unicode%E7%AD%89%E5%83%B9%E6%80%A7) + 英文小寫統一後再比對
+
+## 常見問題
 
 ### 看不到「Generate Insert Scripts」選項？
 
