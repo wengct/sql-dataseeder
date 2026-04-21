@@ -13,6 +13,7 @@ suite('Error Messages', () => {
       assert.ok(ErrorMessages.NO_CONNECTION.includes('connection'));
       assert.ok(ErrorMessages.CONNECTION_LOST.includes('connection'));
       assert.ok(ErrorMessages.CONNECTION_FAILED.includes('connect'));
+      assert.ok(ErrorMessages.AZURE_SQL_DATABASE_CONNECTION_MISMATCH('master', 'winbond-cms').includes('winbond-cms'));
     });
 
     test('should have input validation error messages', () => {

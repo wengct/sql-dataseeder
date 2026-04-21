@@ -2,6 +2,7 @@ import { SqlDataType, parseSqlDataType } from '../models/sqlDataType';
 import { ColumnMetadata } from '../models/columnMetadata';
 import { TableMetadata } from '../models/tableMetadata';
 import { MssqlService } from './mssqlService';
+import { ErrorMessages } from '../utils/errorMessages';
 
 /**
  * SQL 查詢結果的欄位資訊（從 sys.columns 查詢）
@@ -42,7 +43,11 @@ export class SchemaService {
     const { schemaName, tableName, databaseName } = this.mssqlService.getTableInfo(node);
     const query = SchemaService.buildSchemaQuery(schemaName, tableName, databaseName);
 
-    const results = await this.mssqlService.executeQuery<IColumnQueryResult>(node, query);
+    const results = await this.mssqlService.executeQuery<IColumnQueryResult>(node, query, databaseName);
+
+    if (results.length === 0) {
+      throw new Error(ErrorMessages.TABLE_NOT_FOUND(SchemaService.formatTableName(schemaName, tableName, databaseName)));
+    }
 
     const columns = results.map(SchemaService.parseColumnQueryResult);
 
@@ -53,16 +58,12 @@ export class SchemaService {
    * 建立查詢資料表結構的 SQL 語句
    */
   static buildSchemaQuery(schemaName: string, tableName: string, databaseName?: string): string {
-    // 如果有資料庫名稱，使用 USE 語句切換資料庫
-    // USE 語句不支援 QUOTENAME()，故使用方括號跳脫 (bracket escaping) 防止 SQL 注入
-    const useDatabase = databaseName ? `USE ${SchemaService.quoteBracketIdentifier(databaseName)};\n` : '';
-    
-    // 使用 QUOTENAME() 函數進行 SQL Server 識別碼跳脫，防止 SQL 注入攻擊
-    // 將識別碼作為字串字面值傳入 QUOTENAME()，由 SQL Server 處理跳脫
     const quotedSchema = SchemaService.quoteStringLiteral(schemaName);
     const quotedTable = SchemaService.quoteStringLiteral(tableName);
-    
-    return `${useDatabase}SELECT 
+
+    // Azure SQL Database 不支援以三段式名稱參照 sys catalog views，
+    // 因此一律查詢目前連線資料庫的 sys.* metadata。
+    return `SELECT 
     c.name AS column_name,
     t.name AS data_type,
     c.max_length,
@@ -71,10 +72,13 @@ export class SchemaService {
     c.is_nullable,
     c.is_identity,
     c.is_computed
-FROM sys.columns c
-INNER JOIN sys.types t ON c.user_type_id = t.user_type_id
-WHERE c.object_id = OBJECT_ID(QUOTENAME(${quotedSchema}) + '.' + QUOTENAME(${quotedTable}))
-ORDER BY c.column_id;`.trim();
+ FROM sys.columns c
+ INNER JOIN sys.types t ON c.user_type_id = t.user_type_id
+ INNER JOIN sys.tables tbl ON c.object_id = tbl.object_id
+ INNER JOIN sys.schemas s ON tbl.schema_id = s.schema_id
+  WHERE s.name = ${quotedSchema}
+    AND tbl.name = ${quotedTable}
+  ORDER BY c.column_id;`.trim();
   }
 
   /**
@@ -105,6 +109,18 @@ ORDER BY c.column_id;`.trim();
     // 將單引號替換為兩個單引號以防止 SQL 注入
     const escaped = value.replace(/'/g, "''");
     return `'${escaped}'`;
+  }
+
+  static formatTableName(schemaName: string, tableName: string, databaseName?: string): string {
+    const schemaPart = SchemaService.quoteBracketIdentifier(schemaName);
+    const tablePart = SchemaService.quoteBracketIdentifier(tableName);
+
+    if (databaseName?.trim()) {
+      const databasePart = SchemaService.quoteBracketIdentifier(databaseName.trim());
+      return `${databasePart}.${schemaPart}.${tablePart}`;
+    }
+
+    return `${schemaPart}.${tablePart}`;
   }
 
   /**

@@ -50,6 +50,8 @@ INSERT INTO [MyDatabase].[dbo].[Users] ([Name], [Email], [Age], [CreatedAt]) VAL
 
 > 註：若能從 Object Explorer 節點/連線資訊取得資料庫名稱，產生的目標表名會使用三段式名稱 `[database].[schema].[table]`；若取得不到，則退回 `[schema].[table]`。
 
+> 相容性：Azure SQL Database 不會使用 `USE` 切換資料庫；若 Object Explorer 選到的資料表屬於另一個資料庫，會提示你先重新連到該資料庫。SQL Server 若偵測到目前查詢內容不在同一個資料庫，才會自動切換到目標資料庫後再查詢。
+
 ## 支援的資料類型
 
 | 類型                           | 產生的值範例                             | 說明                       |

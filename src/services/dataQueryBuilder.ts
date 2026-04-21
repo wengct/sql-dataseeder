@@ -30,11 +30,8 @@ export class DataQueryBuilder {
     const schemaPart = this.escapeIdentifier(table.schemaName);
     const tablePart = this.escapeIdentifier(table.tableName);
 
-    if (table.databaseName) {
-      const databasePart = this.escapeIdentifier(table.databaseName);
-      return `${databasePart}.${schemaPart}.${tablePart}`;
-    }
-
+    // 使用目前連線資料庫的 schema.table，避免依賴 database.schema.table
+    // 在不同 Azure SQL 執行脈絡下的行為差異。
     return `${schemaPart}.${tablePart}`;
   }
 

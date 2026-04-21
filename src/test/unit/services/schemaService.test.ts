@@ -2,6 +2,7 @@ import * as assert from 'assert';
 import { SqlDataType } from '../../../models/sqlDataType';
 import { ColumnMetadata } from '../../../models/columnMetadata';
 import { SchemaService } from '../../../services/schemaService';
+import { ErrorMessages } from '../../../utils/errorMessages';
 
 suite('SchemaService', () => {
   suite('parseColumnQueryResult', () => {
@@ -320,38 +321,104 @@ suite('SchemaService', () => {
     });
   });
 
+  suite('getTableMetadata', () => {
+    test('should throw table not found when schema query returns no rows', async () => {
+      const service = new SchemaService({
+        getTableInfo: () => ({
+          schemaName: 'dbo',
+          tableName: 'TemplateLibrary',
+          databaseName: 'winbond-cms'
+        }),
+        executeQuery: async () => []
+      } as any);
+
+      await assert.rejects(
+        () => service.getTableMetadata({}),
+        (error: unknown) => error instanceof Error &&
+          error.message === ErrorMessages.TABLE_NOT_FOUND('[winbond-cms].[dbo].[TemplateLibrary]')
+      );
+    });
+
+    test('should pass database name to query execution', async () => {
+      let capturedDatabaseName: string | undefined;
+
+      const service = new SchemaService({
+        getTableInfo: () => ({
+          schemaName: 'dbo',
+          tableName: 'TemplateLibrary',
+          databaseName: 'winbond-cms'
+        }),
+        executeQuery: async (_node: unknown, _query: string, databaseName?: string) => {
+          capturedDatabaseName = databaseName;
+          return [{
+            column_name: 'Id',
+            data_type: 'int',
+            max_length: 4,
+            precision: 10,
+            scale: 0,
+            is_nullable: false,
+            is_identity: true,
+            is_computed: false
+          }];
+        }
+      } as any);
+
+      const result = await service.getTableMetadata({});
+
+      assert.strictEqual(capturedDatabaseName, 'winbond-cms');
+      assert.strictEqual(result.databaseName, 'winbond-cms');
+    });
+  });
+
   suite('buildSchemaQuery', () => {
     test('should build correct SQL query for table schema', () => {
       const query = SchemaService.buildSchemaQuery('dbo', 'Users');
 
       assert.ok(query.includes('sys.columns'));
       assert.ok(query.includes('sys.types'));
-      assert.ok(query.includes("QUOTENAME('dbo')"));
-      assert.ok(query.includes("QUOTENAME('Users')"));
-      assert.ok(query.includes('OBJECT_ID'));
+      assert.ok(query.includes('sys.tables'));
+      assert.ok(query.includes('sys.schemas'));
+      assert.ok(query.includes("s.name = 'dbo'"));
+      assert.ok(query.includes("tbl.name = 'Users'"));
     });
 
     test('should handle schema with special characters', () => {
       const query = SchemaService.buildSchemaQuery('my schema', 'my table');
 
-      assert.ok(query.includes("QUOTENAME('my schema')"));
-      assert.ok(query.includes("QUOTENAME('my table')"));
+      assert.ok(query.includes("s.name = 'my schema'"));
+      assert.ok(query.includes("tbl.name = 'my table'"));
     });
 
-    test('should handle database name with USE statement and bracket escaping', () => {
+    test('should query current database catalog views even when database name is provided', () => {
       const query = SchemaService.buildSchemaQuery('dbo', 'Users', 'MyDatabase');
 
-      assert.ok(query.includes('USE [MyDatabase]'));
+      assert.ok(!query.includes('USE '));
+      assert.ok(query.includes('FROM sys.columns c'));
+      assert.ok(query.includes('INNER JOIN sys.tables tbl'));
+      assert.ok(!query.includes('[MyDatabase].sys.'));
     });
 
     test('should escape single quotes in identifiers to prevent SQL injection', () => {
       const query = SchemaService.buildSchemaQuery("dbo'injection", "Users'; DROP TABLE--", "Db]test");
 
-      // Database name uses bracket escaping
-      assert.ok(query.includes('USE [Db]]test]'));
-      // Schema and table names use QUOTENAME with string literals
-      assert.ok(query.includes("QUOTENAME('dbo''injection')"));
-      assert.ok(query.includes("QUOTENAME('Users''; DROP TABLE--')"));
+      assert.ok(query.includes('FROM sys.columns c'));
+      assert.ok(!query.includes('[Db]]test].sys.'));
+      assert.ok(query.includes("s.name = 'dbo''injection'"));
+      assert.ok(query.includes("tbl.name = 'Users''; DROP TABLE--'"));
+    });
+  });
+
+  suite('formatTableName', () => {
+    test('should include database name when provided', () => {
+      const result = SchemaService.formatTableName('dbo', 'Users', 'MyDb');
+
+      assert.strictEqual(result, '[MyDb].[dbo].[Users]');
+    });
+
+    test('should escape closing brackets in identifiers', () => {
+      const result = SchemaService.formatTableName('db]o', 'User]s', 'My]Db');
+
+      assert.strictEqual(result, '[My]]Db].[db]]o].[User]]s]');
     });
   });
 

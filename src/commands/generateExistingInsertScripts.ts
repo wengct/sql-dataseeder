@@ -106,10 +106,10 @@ export async function generateExistingInsertScripts(node: unknown, deps: Depende
 
       let rows: any[];
       try {
-        rows = await mssqlService.queryTableData(node, querySql);
+        rows = await mssqlService.queryTableData(node, querySql, tableMetadata.databaseName);
       } catch (e) {
         const msg = e instanceof Error ? e.message : String(e);
-        vscode.window.showErrorMessage(ErrorMessages.QUERY_SYNTAX_ERROR(msg));
+        vscode.window.showErrorMessage(msg);
         return;
       }
 

@@ -162,4 +162,102 @@ suite('generateExistingInsertScripts', () => {
       windowAny.showInputBox = origInput;
     }
   });
+
+  test('should surface table query errors without where/order by hint', async () => {
+    const errorMessages: string[] = [];
+
+    const windowAny = vscode.window as any;
+    const origError = windowAny.showErrorMessage;
+    const origInput = windowAny.showInputBox;
+    const origProgress = windowAny.withProgress;
+
+    windowAny.showErrorMessage = async (message: string) => {
+      errorMessages.push(message);
+      return undefined;
+    };
+    const inputs = ['1', '', ''];
+    windowAny.showInputBox = async () => inputs.shift();
+    windowAny.withProgress = async (_opts: any, task: any) => {
+      return task({ report: () => {} }, { isCancellationRequested: false, onCancellationRequested: () => ({ dispose: () => {} }) });
+    };
+
+    try {
+      await generateExistingInsertScripts({}, {
+        mssqlService: {
+          isAvailable: async () => true,
+          queryTableData: async () => {
+            throw new Error('Failed to query table data. Please try again. Error: Msg 40515');
+          }
+        } as any,
+        schemaService: {
+          getTableMetadata: async () => createTable()
+        } as any,
+        dataQueryBuilder: {
+          buildSelectQuery: () => 'SELECT 1'
+        } as any
+      });
+
+      assert.strictEqual(errorMessages[0], 'Failed to query table data. Please try again. Error: Msg 40515');
+    } finally {
+      windowAny.showErrorMessage = origError;
+      windowAny.showInputBox = origInput;
+      windowAny.withProgress = origProgress;
+    }
+  });
+
+  test('should pass database name when querying existing rows', async () => {
+    const windowAny = vscode.window as any;
+    const origInput = windowAny.showInputBox;
+    const origProgress = windowAny.withProgress;
+    const origInfo = windowAny.showInformationMessage;
+
+    const inputs = ['1', '', ''];
+    let capturedDatabaseName: string | undefined;
+
+    windowAny.showInputBox = async () => inputs.shift();
+    windowAny.withProgress = async (_opts: any, task: any) => {
+      return task({ report: () => {} }, { isCancellationRequested: false, onCancellationRequested: () => ({ dispose: () => {} }) });
+    };
+    windowAny.showInformationMessage = async () => undefined;
+
+    try {
+      await generateExistingInsertScripts({}, {
+        mssqlService: {
+          isAvailable: async () => true,
+          queryTableData: async (_node: unknown, _query: string, databaseName?: string) => {
+            capturedDatabaseName = databaseName;
+            return [row];
+          }
+        } as any,
+        schemaService: {
+          getTableMetadata: async () => ({
+            ...createTable(),
+            databaseName: 'winbond-cms'
+          })
+        } as any,
+        dataQueryBuilder: {
+          buildSelectQuery: () => 'SELECT 1'
+        } as any,
+        generator: {
+          generate: () => ({
+            success: true,
+            script: "INSERT INTO [dbo].[Users] ([Name]) VALUES ('Alice');",
+            rowCount: 1,
+            skippedColumns: [],
+            errorMessage: null,
+            hasIdentityInsert: false
+          })
+        } as any,
+        clipboardService: {
+          writeText: async () => undefined
+        } as any
+      });
+
+      assert.strictEqual(capturedDatabaseName, 'winbond-cms');
+    } finally {
+      windowAny.showInputBox = origInput;
+      windowAny.withProgress = origProgress;
+      windowAny.showInformationMessage = origInfo;
+    }
+  });
 });

@@ -11,7 +11,7 @@ suite('DataQueryBuilder', () => {
     includeIdentity: false
   };
 
-  test('should include database name when present', () => {
+  test('should use current database schema-qualified name when database name is present', () => {
     const table: TableMetadata = {
       schemaName: 'dbo',
       tableName: 'Users',
@@ -23,7 +23,8 @@ suite('DataQueryBuilder', () => {
     const builder = new DataQueryBuilder();
     const sql = builder.buildSelectQuery(table, baseOptions);
 
-    assert.ok(sql.includes('FROM [MyDatabase].[dbo].[Users] WITH (NOLOCK)'));
+    assert.ok(sql.includes('FROM [dbo].[Users] WITH (NOLOCK)'));
+    assert.ok(!sql.includes('[MyDatabase].[dbo].[Users]'));
   });
 
   test('should escape right brackets in identifiers', () => {
@@ -38,7 +39,8 @@ suite('DataQueryBuilder', () => {
     const builder = new DataQueryBuilder();
     const sql = builder.buildSelectQuery(table, baseOptions);
 
-    assert.ok(sql.includes('FROM [Db]]Name].[sch]]ema].[Tab]]le] WITH (NOLOCK)'));
+    assert.ok(sql.includes('FROM [sch]]ema].[Tab]]le] WITH (NOLOCK)'));
+    assert.ok(!sql.includes('[Db]]Name].'));
   });
 
   test('should fall back to schema-qualified name when database is missing', () => {

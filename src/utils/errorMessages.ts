@@ -13,6 +13,8 @@ export const ErrorMessages = {
   NO_CONNECTION: 'No active database connection. Please connect to a database using the MSSQL extension first.',
   CONNECTION_LOST: 'Database connection lost. Please reconnect to the database.',
   CONNECTION_FAILED: 'Failed to connect to the database. Please check your connection settings.',
+  AZURE_SQL_DATABASE_CONNECTION_MISMATCH: (currentDatabase: string, targetDatabase: string) =>
+    `Azure SQL Database shared connection is using [${currentDatabase}], but the selected table belongs to [${targetDatabase}]. Reconnect to [${targetDatabase}] in the MSSQL extension and retry.`,
 
   // 權限相關
   ACCESS_DENIED: (tableName: string) => `Access denied to table ${tableName}. Please ensure you have SELECT permission on this table.`,
@@ -32,7 +34,6 @@ export const ErrorMessages = {
   QUERY_RESULT_NO_COLUMNS: 'Query result has no column information. The query may have returned an empty result set.',
   TABLE_EMPTY: (tableName: string) => `Table ${tableName} has no data.`,
   QUERY_NO_RESULTS: 'No data matching the specified conditions.',
-  QUERY_SYNTAX_ERROR: (error: string) => `Query failed: ${error}. Please check your WHERE/ORDER BY clause.`,
   UNSAFE_SQL_CLAUSE: (clauseType: 'WHERE' | 'ORDER BY') =>
     `${clauseType} clause contains potentially dangerous SQL. Avoid statements like DROP, DELETE, INSERT, UPDATE, ALTER, TRUNCATE, EXEC, CREATE, comments, or statement separators.`,
 

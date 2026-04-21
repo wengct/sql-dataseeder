@@ -8,6 +8,14 @@ Check [Keep a Changelog](http://keepachangelog.com/) for recommendations on how 
 
 ## [Unreleased]
 
+## [0.3.2] - 2026-04-21
+
+### Fixed
+
+- 修正資料表結構與既有資料查詢在 Azure SQL Database / SQL Server 間的相容性判斷
+- Azure SQL Database 在共享連線不位於目標資料庫時，改為顯示明確的重新連線提示，不再誤報 `Table ... not found`
+- SQL Server 在目前共享連線資料庫與目標資料庫不同時，會自動切換到目標資料庫後再查詢
+
 ## [0.3.1] - 2026-01-10
 
 ### Changed
@@ -58,4 +66,3 @@ Check [Keep a Changelog](http://keepachangelog.com/) for recommendations on how 
 - 支援 18 種 SQL Server 資料類型
 - 右鍵選單整合
 - 自動複製到剪貼簿
-
